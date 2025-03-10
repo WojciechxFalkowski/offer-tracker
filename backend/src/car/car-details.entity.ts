@@ -29,6 +29,6 @@ export class CarDetails {
     @Column({ nullable: true })
     generation: string;
 
-    @Column({ nullable: true, unique: true })
+    @Column({ nullable: true })
     vin: string;
 }

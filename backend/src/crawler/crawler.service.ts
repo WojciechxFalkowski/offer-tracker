@@ -22,7 +22,7 @@ export class CrawlerService {
 		private offerService: CarService,
 	) { }
 
-	// @Cron(CronExpression.EVERY_10_MINUTES)
+	@Cron(CronExpression.EVERY_10_MINUTES)
 	public async handleCron() {
 		this.logger.log('Running scheduled crawler job');
 		const trackedUrls = await this.trackedUrlService.findAll();

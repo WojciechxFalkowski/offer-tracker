@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6">
+  <div class="bg-white rounded-lg shadow-md p-4">
     <h2 class="text-xl font-semibold text-gray-800 mb-4">
       {{ isEditing ? "Edytuj URL" : "Dodaj nowy URL do śledzenia" }}
     </h2>

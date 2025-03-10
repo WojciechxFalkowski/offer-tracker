@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-56 bg-gray-200">
+  <div class="relative h-56 xl:h-72 bg-gray-200">
     <!-- Gdy są zdjęcia -->
     <div v-if="hasImages" class="h-full">
       <div class="relative h-full">

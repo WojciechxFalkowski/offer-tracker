@@ -47,7 +47,7 @@ export class CarService {
         offer.title = `${car.details.brand} ${car.details.model} ${car.details.version}`.trim();
         offer.externalId = car.url.split('/').pop() || '';
         offer.price = car.price;
-
+        offer.publishedDate = new Date(car.originalDate)
         // Tworzenie szczegółów samochodu
         const carDetails = new CarDetails();
         Object.assign(carDetails, car.details);

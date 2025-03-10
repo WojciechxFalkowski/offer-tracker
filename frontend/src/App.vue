@@ -1,52 +1,26 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Nagłówek -->
-    <AppHeader />
+  <AppHeader />
 
-    <!-- Główna zawartość -->
-    <main class="container mx-auto px-4 py-8">
-      <!-- Tabs -->
-      <TabNavigation :activeTab="activeTab" @change-tab="activeTab = $event" />
+  <ContainerWrapper>
+    <TabNavigation />
+  </ContainerWrapper>
 
-      <!-- Zawartość tabów -->
-      <TrackedUrls v-if="activeTab === 'URLs'" />
-
-      <OffersList
-        v-else-if="activeTab === 'offers'"
-        :offers="offers"
-        :isLoading="isLoadingOffers"
-      />
-    </main>
-  </div>
+  <router-view></router-view>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
 import AppHeader from "./components/AppHeader.vue";
-import TabNavigation from "./components/TabNavigation.vue";
-import TrackedUrls from "./components/TrackedUrls.vue";
-import OffersList from "./components/OffersList.vue";
-import api from "./services/api";
 
-const activeTab = ref("URLs");
-const isLoadingOffers = ref(false);
-const offers = ref([]);
+import TabNavigation from "@/components/TabNavigation.vue";
+import { onMounted } from "vue";
+import { useCarStore } from "./stores/carStore";
+import ContainerWrapper from "@/components/ContainerWrapper.vue";
+import { useTrackedUrls } from "./composables/useTrackedUrls";
 
-// Pobieranie ofert
-async function fetchOffers() {
-  isLoadingOffers.value = true;
-  try {
-    // await api.get("/api/cars?limit=30&sort=createdAt,DESC");
-    const response = await api.get("/api/cars?limit=500&sort=createdAt,DESC");
-    offers.value = response.data;
-  } catch (error) {
-    console.error("Błąd podczas pobierania ofert:", error);
-  } finally {
-    isLoadingOffers.value = false;
-  }
-}
-
+const carStore = useCarStore();
+const { fetchTrackedUrls } = useTrackedUrls();
 onMounted(() => {
-  fetchOffers();
+  fetchTrackedUrls();
+  carStore.fetchCars();
 });
 </script>

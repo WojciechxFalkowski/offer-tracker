@@ -4,12 +4,13 @@ export interface Offer {
     externalId: string;
     title: string;
     price: string;
-    images: string;
+    images: string[]; // Zmienione z string na string[]
     url: string;
     specification: CarSpecification;
     details: CarDetails;
     createdAt: Date;
     updatedAt: Date;
+    trackedUrlId: number | null; // Dodane pole
 }
 
 export interface CarDetails {
@@ -31,4 +32,5 @@ export interface CarSpecification {
     bodyType: string;
     gearbox: string;
     drive: string;
+    mileage: string; // Dodane pole
 }
