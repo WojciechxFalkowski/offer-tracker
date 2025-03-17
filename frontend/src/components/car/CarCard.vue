@@ -48,7 +48,11 @@
 
       <!-- Przyciski akcji -->
       <div class="flex justify-between items-center mt-auto">
-        <span class="text-xs text-gray-500">
+        <span v-if="car.publishedDate" class="text-xs text-gray-500">
+          Opublikowano: {{ new Date(car.publishedDate).toLocaleDateString() }}
+        </span>
+
+        <span v-else class="text-xs text-gray-500">
           Dodano: {{ new Date(car.createdAt).toLocaleDateString() }}
         </span>
         <a

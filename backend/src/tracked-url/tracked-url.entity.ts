@@ -1,4 +1,4 @@
-import { Car } from 'src/car/car.entity';
+import { Car } from './../car/car.entity';
 import {
     Column,
     CreateDateColumn,

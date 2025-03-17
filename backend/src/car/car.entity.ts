@@ -27,7 +27,7 @@ export class Car {
     title: string;
 
     @Column({ nullable: true })
-    price: string;
+    price: number;
 
     @Column({ unique: true })
     url: string;

@@ -243,7 +243,7 @@
           </p>
 
           <button
-            @click="clearAllFilters"
+            @click="() => clearAllFilters(true)"
             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Wyczyść wszystkie filtry
@@ -260,9 +260,14 @@
       </div>
 
       <!-- Paginacja -->
+      <!-- Paginacja -->
       <div v-if="totalPages > 1" class="p-4 border-t border-gray-200">
         <div class="flex justify-center">
-          <!-- Tutaj komponent paginacji -->
+          <Pagination
+            :current-page="page"
+            :total-pages="totalPages"
+            @page-change="changePage"
+          />
         </div>
       </div>
     </div>
@@ -298,6 +303,8 @@ import FilterCounter from "@/components/filters/FilterCounter.vue";
 import FilterSkeleton from "@/components/filters/FilterSkeleton.vue";
 import CarCard from "@/components/car/CarCard.vue";
 import ContainerWrapper from "@/components/ContainerWrapper.vue";
+import Pagination from "@/components/Pagination.vue";
+
 // Importy ikon
 import IconBasic from "@/components/icons/IconBasic.vue";
 import IconEngine from "@/components/icons/IconEngine.vue";
@@ -599,4 +606,10 @@ onMounted(() => {
   // Pobierz dane
   fetchCars();
 });
+
+const changePage = (newPage: number) => {
+  page.value = newPage;
+  updateUrlFromFilters(); // Aktualizuj URL z nowym numerem strony
+  fetchCars(); // Pobierz dane dla nowej strony
+};
 </script>

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Page } from 'playwright';
 import { CarI, CarDetails, CarSpecification, OnlyMileageRequired } from './crawler.types';
@@ -6,13 +6,15 @@ import { createBrowserPage, handleCookieBanner } from '../utils/browser.utils';
 import { TrackedUrlService } from 'src/tracked-url/tracked-url.service';
 import { CarService } from 'src/car/car.service';
 import { MONTHS_MAP } from 'src/utils/date.utils';
+import { SettingsService } from '@/settings/settings.service';
+import { SettingsKey } from '@/settings/settings-keys.enum';
 
 @Injectable()
-export class CrawlerService {
+export class CrawlerService implements OnModuleInit {
 	private readonly logger = new Logger(CrawlerService.name);
 	private readonly baseUrl = 'https://www.otomoto.pl';
 	private readonly maxAllowedPages = Infinity;
-	private readonly maxPagesToScrape: number = 5;
+	private readonly maxPagesToScrape: number = 10;
 	private readonly maxOffersToScrape: number = Infinity;
 	private readonly CONSECUTIVE_EXISTING_OFFERS_THRESHOLD = Infinity;// 3;
 	private readonly NAVIGATION_TIMEOUT = 15000;
@@ -20,9 +22,39 @@ export class CrawlerService {
 	constructor(
 		private trackedUrlService: TrackedUrlService,
 		private offerService: CarService,
+		private settingsService: SettingsService
 	) { }
 
-	@Cron(CronExpression.EVERY_10_MINUTES)
+	async onModuleInit() {
+		await this.scheduleNextRun();
+	}
+
+	private async scheduleNextRun() {
+		const scrapingConfig = await this.settingsService.getSetting<{ frequencyInMinutes: number }>(
+			SettingsKey.SCRAPING_SETTINGS,
+		);
+
+		const frequencyInMinutes = scrapingConfig?.frequencyInMinutes ?? 60;
+		const milliseconds = frequencyInMinutes * 60 * 1000;
+
+		console.log('scrapingConfig');
+		console.log(scrapingConfig);
+
+		console.log('frequencyInMinutes');
+		console.log(frequencyInMinutes);
+
+		console.log('milliseconds');
+		console.log(milliseconds);
+
+
+		setTimeout(async () => {
+			await this.handleCron();
+			await this.scheduleNextRun();
+		}, milliseconds);
+	}
+
+
+	// @Cron(CronExpression.EVERY_HOUR)
 	public async handleCron() {
 		this.logger.log('Running scheduled crawler job');
 		const trackedUrls = await this.trackedUrlService.findAll();
@@ -836,15 +868,24 @@ export class CrawlerService {
 	// 	}
 	// }
 
-	private async extractOfferPrice(page: Page): Promise<{ price: string, errorCount: number, successCount: number }> {
+	private async extractOfferPrice(page: Page): Promise<{ price: number, errorCount: number, successCount: number }> {
 		let errorCount = 0;
 		let successCount = 0;
-		let extractedPrice = '';
+		let extractedPrice = 0;
 		try {
 			const summaryInfoArea = page.getByTestId('summary-info-area');
 			const priceLocator = summaryInfoArea.locator('.offer-price__number');
 			const priceText = await priceLocator.textContent();
-			extractedPrice = priceText ?? '';
+			if (!priceText) {
+				throw new Error("Price is empty")
+			}
+			const integerPart = priceText.split(',')[0].replace(/\D/g, '');
+			const intPrice = parseInt(integerPart, 10);
+			console.log('intPrice');
+			console.log(intPrice);
+
+			extractedPrice = intPrice ?? 0;
+
 			if (extractedPrice) {
 				successCount++;
 			} else {
@@ -855,7 +896,7 @@ export class CrawlerService {
 		} catch (error: any) {
 			console.warn(`Error extracting offer price: ${error.message}`);
 			errorCount++;
-			return { price: '', errorCount, successCount };
+			return { price: 0, errorCount, successCount };
 		}
 	}
 

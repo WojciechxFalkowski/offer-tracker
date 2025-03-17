@@ -3,11 +3,12 @@ export interface Offer {
     id: number;
     externalId: string;
     title: string;
-    price: string;
+    price: number;
     images: string[]; // Zmienione z string na string[]
     url: string;
     specification: CarSpecification;
     details: CarDetails;
+    publishedDate: Date | null | undefined;
     createdAt: Date;
     updatedAt: Date;
     trackedUrlId: number | null; // Dodane pole

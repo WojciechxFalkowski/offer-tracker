@@ -7,7 +7,7 @@ export interface CarI {
     details: CarDetails;
     specification: CarSpecification;
     images: string[];
-    price: string;
+    price: number;
 }
 
 export interface CarDetails {

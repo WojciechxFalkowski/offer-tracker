@@ -4,8 +4,9 @@ export interface ResponseCar {
     id: number;
     externalId: string;
     title: string;
-    price?: string;
+    price?: number;
     url: string;
+    publishedDate?: Date | null | undefined;
     createdAt: Date;
     updatedAt: Date;
     trackedUrlId?: number | null;

@@ -18,8 +18,11 @@ export const useCarStore = defineStore('car', () => {
         error.value = null;
 
         try {
-            const response = await api.get<Offer[]>('/api/cars');
-            cars.value = response.data;
+            const response = await api.get<{
+                cars: Offer[],
+                total: number,
+            }>('/api/cars');
+            cars.value = response.data.cars;
             initialized.value = true;
         } catch (err) {
             console.error('Błąd podczas pobierania ofert:', err);
@@ -35,8 +38,11 @@ export const useCarStore = defineStore('car', () => {
         error.value = null;
 
         try {
-            const response = await api.get<Offer[]>('/api/cars');
-            cars.value = response.data;
+            const response = await api.get<{
+                cars: Offer[],
+                total: number,
+            }>('/api/cars');
+            cars.value = response.data.cars;
         } catch (err) {
             console.error('Błąd podczas odświeżania ofert:', err);
             error.value = 'Nie udało się odświeżyć ofert. Spróbuj ponownie później.';

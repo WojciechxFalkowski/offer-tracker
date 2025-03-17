@@ -1,4 +1,6 @@
-// composables/useCarFilters.js
+// composables/useCarFilters.ts
+import { useFilterOptionsStore } from '@/stores/filterOptionsStore';
+import { storeToRefs } from 'pinia';
 import { ref, computed } from 'vue';
 
 export function useCarFilters() {
@@ -275,6 +277,10 @@ export function useCarFilters() {
         return brand ? brand.label : brandValue;
     };
 
+
+    const filterOptionsStore = useFilterOptionsStore();
+    const { filterOptions } = storeToRefs(filterOptionsStore);
+
     const gearboxOptions = ref([
         { value: "manual", label: "Manualna" },
         { value: "automatic", label: "Automatyczna" },
@@ -311,12 +317,17 @@ export function useCarFilters() {
         { value: "lpg", label: "LPG" },
     ]);
 
-    const brandOptions = ref([
-        { value: "audi", label: "Audi" },
-        { value: "bmw", label: "BMW" },
-        { value: "mercedes", label: "Mercedes-Benz" },
-        { value: "volkswagen", label: "Volkswagen" },
-    ]);
+    const brandOptions = computed(() => {
+        console.log("brandOptions");
+
+        if (!filterOptions.value?.brands) return [];
+        console.log('v1');
+
+        return filterOptions.value.brands.map(brand => ({
+            value: brand.toLowerCase(),
+            label: brand
+        }));
+    });
 
     return {
         filters,

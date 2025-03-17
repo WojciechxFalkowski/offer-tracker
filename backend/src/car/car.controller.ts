@@ -9,9 +9,40 @@ export class CarController {
 
     @Get()
     async findAll(
-        @Query('limit', new DefaultValuePipe(500), ParseIntPipe) limit: number,
-        @Query('sort', new DefaultValuePipe('createdAt,DESC')) sort: string,
-    ): Promise<ResponseCar[]> {
-        return await this.offerService.findAll(limit, sort);
+        @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+        @Query('pageSize', new DefaultValuePipe(12), ParseIntPipe) pageSize: number,
+        @Query('sort', new DefaultValuePipe('createdAt')) sort: string,
+        @Query('order', new DefaultValuePipe('desc')) order: string,
+        @Query() filters: Record<string, any>,
+    ): Promise<{ cars: ResponseCar[]; total: number }> {
+        return await this.offerService.findAll(page, pageSize, sort, order, filters);
     }
+
+    @Get('brands')
+    async getBrands(): Promise<string[]> {
+        return await this.offerService.getBrands();
+    }
+
+    @Get('models')
+    async getModels(@Query('brand') brand?: string): Promise<string[]> {
+        return await this.offerService.getModels(brand);
+    }
+
+    @Get('filter-options')
+    async getFilterOptions(): Promise<{
+        years: string[];
+        gearboxTypes: string[];
+        colors: string[];
+        fuelTypes: string[];
+        engineTypes: string[];
+        doorCounts: string[];
+        seatCounts: string[];
+        driveTypes: string[];
+        brands: string[];
+        models: Record<string, string[]>;
+    }> {
+        return await this.offerService.getFilterOptions();
+    }
+
+
 }
