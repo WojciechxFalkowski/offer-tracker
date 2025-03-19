@@ -1,5 +1,5 @@
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 
 services:
   # postgres:
@@ -22,8 +22,6 @@ services:
       args:
         - BACKEND_PORT=${BACKEND_PORT}
     container_name: offer-tracker-backend
-    # networks:
-    #   - offer-track-network
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     # depends_on:
@@ -42,14 +40,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL}
     container_name: offer-tracker-frontend
-    # networks:
-    #   - offer-track-network
     ports:
       - ${VITE_PORT}:${VITE_PORT}
     restart: unless-stopped
-# volumes:
-  # postgres_data:
-# networks:
-#   offer-track-network:
-#     external: true

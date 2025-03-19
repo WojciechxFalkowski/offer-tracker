@@ -4,6 +4,12 @@ FROM node:20.11.1-alpine as build-stage
 # Set the working directory inside the container
 WORKDIR /app
 
+# Definiujemy argument do przyjęcia zmiennej podczas builda
+ARG VITE_API_URL
+
+# Ustawiamy jako ENV, żeby był dostępny dla aplikacji
+ENV VITE_API_URL=${VITE_API_URL}
+
 # Copy package.json and pnpm-lock.yaml to install production dependencies
 COPY package.json pnpm-lock.yaml ./
 
