@@ -7,19 +7,12 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
+  app.enableCors();
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
   }));
 
-  console.log('process.env.BACKEND_PORT');
-  console.log(process.env.BACKEND_PORT);
-  
   await app.listen(process.env.BACKEND_PORT || 3000);
 }
 
