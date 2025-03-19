@@ -19,11 +19,13 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      args:
-        - BACKEND_PORT=${BACKEND_PORT}
+      # args:
+      #   - BACKEND_PORT=${BACKEND_PORT}
     container_name: offer-tracker-backend
-    ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    environment:
+      BACKEND_PORT: ${BACKEND_PORT}
+    # ports:
+    #   - "${BACKEND_PORT}:${BACKEND_PORT}"
     # depends_on:
     #   - postgres
     # environment:
