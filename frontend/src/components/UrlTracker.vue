@@ -66,7 +66,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { ElMessage } from "element-plus";
 import axios from "axios";
 
 interface TrackedUrl {
@@ -105,7 +104,7 @@ const fetchTrackedUrls = async () => {
     trackedUrls.value = response.data;
   } catch (error) {
     console.error("Error fetching tracked URLs:", error);
-    ElMessage.error("Failed to fetch tracked URLs");
+    // ElMessage.error("Failed to fetch tracked URLs");
   } finally {
     loadingUrls.value = false;
   }
@@ -113,12 +112,12 @@ const fetchTrackedUrls = async () => {
 
 const submitUrl = async () => {
   if (!form.value.url) {
-    ElMessage.warning("Please enter a URL to track");
+    // ElMessage.warning("Please enter a URL to track");
     return;
   }
 
   if (!form.value.url.startsWith("http")) {
-    ElMessage.warning("URL must start with http:// or https://");
+    // ElMessage.warning("URL must start with http:// or https://");
     return;
   }
 
@@ -140,12 +139,12 @@ const submitUrl = async () => {
       throw new Error("Błąd sieciowy");
     }
 
-    ElMessage.success("URL został dodany pomyślnie");
+    // ElMessage.success("URL został dodany pomyślnie");
     form.value = { url: "", description: "" };
     await fetchTrackedUrls();
   } catch (error) {
     console.error("Błąd przy dodawaniu URL:", error);
-    ElMessage.error("Nie udało się dodać URL");
+    // ElMessage.error("Nie udało się dodać URL");
   } finally {
     loading.value = false;
   }
@@ -156,11 +155,11 @@ const deleteTrackedUrl = async (id: number) => {
 
   try {
     await axios.delete(`${API_URL}/tracked-urls/${id}`);
-    ElMessage.success("URL removed from tracking");
+    // ElMessage.success("URL removed from tracking");
     await fetchTrackedUrls();
   } catch (error) {
     console.error("Error deleting URL:", error);
-    ElMessage.error("Failed to remove URL");
+    // ElMessage.error("Failed to remove URL");
   } finally {
     deletingId.value = null;
   }

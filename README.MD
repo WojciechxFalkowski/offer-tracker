@@ -109,7 +109,7 @@ DB_SYNCHRONIZE=true
 FRONTEND_URL=http://localhost:5173
 
 # Server
-PORT=3000
+BACKEND_PORT=3000
 ```
 
 4. Create the database in PostgreSQL:
@@ -170,3 +170,14 @@ Some potential enhancements:
 - More detailed offer information
 - Filtering and searching capabilities
 - User authentication
+
+
+
+
+
+
+
+
+
+
+docker network create offer-track-network

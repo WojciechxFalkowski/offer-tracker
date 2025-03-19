@@ -1,15 +1,15 @@
 // src/router/index.ts
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { TABS } from '../constants/tabs'
 
 // Importy komponentów
 import CarList from '@/views/CarList.vue'
 import TrackedUrls from '@/views/TrackedUrls.vue'
 
-const routes = [
+const routes: RouteRecordRaw[] = [
     {
         path: '/',
-        redirect: TABS[0].path // Przekierowanie z głównej strony na pierwszy tab
+        redirect: TABS[0].path as string // Przekierowanie z głównej strony na pierwszy tab
     },
     {
         path: '/urls',

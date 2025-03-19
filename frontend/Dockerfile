@@ -1,14 +1,29 @@
-# Etap budowania
-FROM node:18-alpine as build-stage
+# ---------- Build Stage ----------
+FROM node:20.11.1-alpine as build-stage
+
+# Set the working directory inside the container
 WORKDIR /app
-COPY package*.json ./
+
+# Copy package.json and pnpm-lock.yaml to install production dependencies
+COPY package.json pnpm-lock.yaml ./
+
 RUN npm install
+RUN ls
 COPY . .
 RUN npm run build
 
-# Etap produkcyjny
-FROM nginx:stable-alpine as production-stage
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Użyj serwera "serve" do uruchamiania aplikacji
+RUN npm install -g serve
+
+# Expose dynamiczny port
+EXPOSE ${VITE_PORT}
+
+# Uruchom aplikację z dynamicznym portem
+CMD ["sh", "-c", "serve -s dist -l 7050"]
+
+# # ---------- Production Stage ----------
+# FROM nginx:stable-alpine as production-stage
+# COPY --from=build-stage /app/dist /usr/share/nginx/html
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# EXPOSE 80
+# CMD ["nginx", "-g", "daemon off;"]

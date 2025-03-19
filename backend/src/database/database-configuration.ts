@@ -8,7 +8,7 @@ export default () => {
 			port: process.env.DATABASE_PORT || 3307,
 		},
 		environment: {
-			port: process.env.PORT
+			port: process.env.BACKEND_PORT
 		},
 		allowed: {
 			origin: process.env.ALLOWED_ORIGIN,

@@ -17,7 +17,10 @@ async function bootstrap() {
     whitelist: true,
   }));
 
-  await app.listen(process.env.PORT || 3000);
+  console.log('process.env.BACKEND_PORT');
+  console.log(process.env.BACKEND_PORT);
+  
+  await app.listen(process.env.BACKEND_PORT || 3000);
 }
 
 bootstrap();
