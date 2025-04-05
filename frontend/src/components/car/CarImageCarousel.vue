@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-56 xl:h-72 bg-gray-200">
+  <div class="relative bg-gray-200">
     <!-- Gdy są zdjęcia -->
     <div v-if="hasImages" class="h-full">
       <div class="relative h-full">
@@ -7,7 +7,7 @@
         <img
           :src="currentImage"
           :alt="alt"
-          class="w-full h-full object-cover"
+          class="w-full object-cover sm:h-[200px] md:h-[224px] lg:h-[200px] xl:h-[300px]"
         />
 
         <!-- Licznik zdjęć -->

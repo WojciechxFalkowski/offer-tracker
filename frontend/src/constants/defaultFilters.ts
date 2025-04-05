@@ -1,0 +1,1 @@
+export const DEFAULT_STRING_FILTERS = 'sort=publishedDate&order=desc'

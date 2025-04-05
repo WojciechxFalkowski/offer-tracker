@@ -44,12 +44,12 @@ interface SortOption {
 const props = defineProps({
   modelValue: {
     type: Object,
-    default: () => ({ field: "createdAt", direction: "desc" }),
+    default: () => ({ field: "publishedDate", direction: "desc" }),
   },
   options: {
     type: Array as () => SortOption[],
     default: () => [
-      { label: "Data dodania", value: "createdAt" },
+      { label: "Data dodania", value: "publishedDate" },
       { label: "Cena", value: "price" },
       { label: "Rok produkcji", value: "productionYear" },
       { label: "Przebieg", value: "mileage" },

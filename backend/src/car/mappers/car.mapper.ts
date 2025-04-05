@@ -12,7 +12,6 @@ export const mapCarToResponse = (car: Car): ResponseCar => {
         url: car.url,
         createdAt: car.createdAt,
         updatedAt: car.updatedAt,
-        trackedUrlId: car.trackedUrl?.id ?? null,
         publishedDate: car.publishedDate ?? null,
         details: {
             brand: car.details.brand,

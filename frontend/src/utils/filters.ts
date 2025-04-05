@@ -1,6 +1,6 @@
 // Funkcja przygotowująca filtry do URL
 export const prepareFiltersForUrl = (filters: Record<string, any>) => {
-    const urlParams: Record<string, string> = {};
+    const params = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, value]) => {
         if (
@@ -11,15 +11,23 @@ export const prepareFiltersForUrl = (filters: Record<string, any>) => {
             return;
         }
 
-        // Dla tablic, łącz wartości przecinkami
         if (Array.isArray(value)) {
-            urlParams[key] = value.join(",");
+            value.forEach((val) => {
+                if (val !== null && val !== "") {
+                    params.append(key, val.toString());
+                }
+            });
         } else {
-            urlParams[key] = value.toString();
+            params.append(key, value.toString());
         }
     });
 
-    return urlParams;
+    return params;
+};
+
+const parseNumber = (value: any): number | undefined => {
+    const num = typeof value === 'number' ? value : parseInt(value, 10);
+    return isNaN(num) ? undefined : num;
 };
 
 export const prepareFiltersForApi = (filters: Record<string, any>): ApiFilters => {
@@ -37,8 +45,9 @@ export const prepareFiltersForApi = (filters: Record<string, any>): ApiFilters =
         // Mapowanie kluczy na parametry API
         switch (key) {
             case "minPrice":
-                if (typeof value === "number") {
-                    apiFilters.priceFrom = value;
+                const parsed = parseNumber(value);
+                if (parsed !== undefined) {
+                    apiFilters.priceFrom = parsed;
                 }
                 break;
             case "maxPrice":
@@ -57,13 +66,17 @@ export const prepareFiltersForApi = (filters: Record<string, any>): ApiFilters =
                 }
                 break;
             case "brand":
-                if (typeof value === "string") {
+                if (Array.isArray(value)) {
                     apiFilters.make = value;
+                } else if (typeof value === "string") {
+                    apiFilters.make = [value]; // ← zawsze array, by backend dostał jednolitą strukturę
                 }
                 break;
             case "model":
-                if (typeof value === "string") {
+                if (Array.isArray(value)) {
                     apiFilters.model = value;
+                } else if (typeof value === "string") {
+                    apiFilters.model = [value];
                 }
                 break;
             case "version":

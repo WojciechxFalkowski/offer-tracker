@@ -19,6 +19,8 @@ export const useFilterOptions = () => {
     const doorCounts = computed(() => filterOptions.value?.doorCounts || []);
     const seatCounts = computed(() => filterOptions.value?.seatCounts || []);
     const driveTypes = computed(() => filterOptions.value?.driveTypes || []);
+    const minCarPrice = computed(() => filterOptions.value?.priceRange.min || 0);
+    const maxCarPrice = computed(() => filterOptions.value?.priceRange.max || 0);
 
     // Funkcja do pobierania modeli dla konkretnej marki
     const getModelsForBrand = (brand: string): string[] => {
@@ -27,7 +29,7 @@ export const useFilterOptions = () => {
 
     // Inicjalizacja - pobierz opcje filtrów przy montowaniu komponentu
     onMounted(() => {
-        fetchFilterOptions();
+        // fetchFilterOptions();
     });
 
     return {
@@ -48,6 +50,8 @@ export const useFilterOptions = () => {
         doorCounts,
         seatCounts,
         driveTypes,
+        minCarPrice,
+        maxCarPrice,
 
         // Metody
         fetchFilterOptions,

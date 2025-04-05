@@ -8,3 +8,21 @@ export class CreateTrackedUrlDto {
     @IsString()
     description?: string;
 }
+
+export class UpdateTrackedUrlDto {
+    @IsOptional()
+    @IsString()
+    url?: string;
+
+    @IsOptional()
+    @IsString()
+    description?: string;
+
+    @IsOptional()
+    @IsString()
+    brand?: string;
+
+    @IsOptional()
+    @IsString()
+    model?: string;
+}

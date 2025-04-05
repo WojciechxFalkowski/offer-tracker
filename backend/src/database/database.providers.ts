@@ -19,7 +19,7 @@ const dataSource = new DataSource({
   migrations: [__dirname + '/../migrations/**/*{.ts,.js}'],
   migrationsRun: false,
   synchronize: false,
-  logging: false,
+  // logging: ['query', 'error']
 });
 
 

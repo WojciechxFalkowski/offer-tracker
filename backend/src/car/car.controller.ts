@@ -28,6 +28,11 @@ export class CarController {
         return await this.offerService.getModels(brand);
     }
 
+    @Get('brands-and-models')
+    async getBrandsAndModels(): Promise<{ brands: string[]; models: { id: string, models }[] }> {
+        return await this.offerService.getBrandsAndModels();
+    }
+
     @Get('filter-options')
     async getFilterOptions(): Promise<{
         years: string[];
@@ -39,7 +44,8 @@ export class CarController {
         seatCounts: string[];
         driveTypes: string[];
         brands: string[];
-        models: Record<string, string[]>;
+        models: { id: string, models }[];
+        priceRange: { min: number; max: number }
     }> {
         return await this.offerService.getFilterOptions();
     }

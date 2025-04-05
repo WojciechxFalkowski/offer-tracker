@@ -4,9 +4,10 @@ import { TrackedUrlController } from './tracked-url.controller';
 import { trackedUrlProviders } from './tracked-url.providers';
 import { DatabaseModule } from 'src/database/database.module';
 import { ConfigModule } from '@nestjs/config';
+import { CarModule } from '../car/car.module';
 
 @Module({
-    imports: [DatabaseModule, ConfigModule],
+    imports: [DatabaseModule, ConfigModule, CarModule],
     controllers: [TrackedUrlController],
     providers: [...trackedUrlProviders, TrackedUrlService],
     exports: [TrackedUrlService],

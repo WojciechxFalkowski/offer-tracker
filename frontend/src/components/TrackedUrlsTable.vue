@@ -67,7 +67,7 @@
           <td
             class="px-2 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm"
           >
-            {{ url.offers?.length || 0 }} ofert
+            {{ url.matchingCarsCount }}
           </td>
           <td class="px-2 sm:px-4 md:px-6 py-2 sm:py-4 whitespace-nowrap">
             <div class="relative">
@@ -97,6 +97,17 @@
 
                 <button
                   @click="
+                    openBrandModelModal(url);
+                    openDropdownId = null;
+                  "
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                >
+                  <IconCar class="w-4 h-4 mr-2" />
+                  Marka/Model
+                </button>
+
+                <button
+                  @click="
                     $emit('delete', url.id);
                     openDropdownId = null;
                   "
@@ -111,6 +122,14 @@
         </tr>
       </tbody>
     </table>
+
+    <TrackedUrlBrandModelModal
+      v-if="selectedUrl"
+      :is-open="isBrandModelModalOpen"
+      :tracked-url="selectedUrl"
+      @close="closeBrandModelModal"
+      @save="handleBrandModelSave"
+    />
   </div>
 </template>
 
@@ -123,6 +142,9 @@ import { ref } from "vue";
 import { onClickOutside, useEventListener } from "@vueuse/core";
 import IconDotsVertical from "@/components/icons/IconDotsVertical.vue";
 import { vOnClickOutside } from "@vueuse/components";
+import IconCar from "@/components/icons/IconCar.vue";
+import TrackedUrlBrandModelModal from "./TrackedUrlBrandModelModal.vue";
+import api from "@/services/api";
 
 defineProps({
   trackedUrls: {
@@ -131,13 +153,39 @@ defineProps({
   },
 });
 
-defineEmits(["edit", "delete"]);
+const emit = defineEmits(["edit", "delete", "refresh"]);
+
+const openDropdownId = ref<number | null>(null);
+const isBrandModelModalOpen = ref(false);
+const selectedUrl = ref<TrackedUrl | null>(null);
 
 const toggleDropdown = (id: number) => {
   openDropdownId.value = openDropdownId.value === id ? null : id;
 };
 
-const openDropdownId = ref<number | null>(null);
+const openBrandModelModal = (url: TrackedUrl) => {
+  selectedUrl.value = url;
+  isBrandModelModalOpen.value = true;
+};
+
+const closeBrandModelModal = () => {
+  isBrandModelModalOpen.value = false;
+  selectedUrl.value = null;
+};
+
+const handleBrandModelSave = async (data: { brand: string; model: string }) => {
+  if (!selectedUrl.value) return;
+
+  try {
+    await api.put(`/api/tracked-urls/${selectedUrl.value.id}`, data);
+    // Emit an event to refresh the data
+    emit("refresh");
+  } catch (error) {
+    console.error("Error updating brand/model:", error);
+  } finally {
+    closeBrandModelModal();
+  }
+};
 
 // Zamykaj dropdown przy kliknięciu gdziekolwiek
 useEventListener(

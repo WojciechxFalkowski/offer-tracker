@@ -5,13 +5,12 @@ import { storeToRefs } from 'pinia';
 export function useCars() {
     const carStore = useCarStore();
     const { cars, isLoading, error } = storeToRefs(carStore);
-    const { fetchCars, refreshCars } = carStore;
+    const { refreshCars } = carStore;
 
     return {
         cars,
         isLoading,
         error,
-        fetchCars,
         refreshCars
     };
 }

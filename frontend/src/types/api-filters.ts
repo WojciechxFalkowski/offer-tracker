@@ -3,8 +3,8 @@ interface ApiFilters {
     priceTo?: number;
     yearFrom?: number;
     yearTo?: number;
-    make?: string;
-    model?: string;
+    make?: string | string[];
+    model?: string | string[];
     trim?: string;
     fuel?: string[];
     cubicCapacity?: { min?: number; max?: number };

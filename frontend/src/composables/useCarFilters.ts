@@ -1,13 +1,14 @@
 // composables/useCarFilters.ts
 import { useFilterOptionsStore } from '@/stores/filterOptionsStore';
+import { watchOnce } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 export function useCarFilters() {
     const filters = ref({
         // Podstawowe
-        brand: "",
-        model: "",
+        brand: [],
+        model: [],
         version: "",
         minPrice: null as number | null,
         maxPrice: null as number | null,
@@ -279,7 +280,7 @@ export function useCarFilters() {
 
 
     const filterOptionsStore = useFilterOptionsStore();
-    const { filterOptions } = storeToRefs(filterOptionsStore);
+    const { filterOptions, isLoading: isLoadingFilters } = storeToRefs(filterOptionsStore);
 
     const gearboxOptions = ref([
         { value: "manual", label: "Manualna" },
@@ -318,15 +319,27 @@ export function useCarFilters() {
     ]);
 
     const brandOptions = computed(() => {
-        console.log("brandOptions");
-
         if (!filterOptions.value?.brands) return [];
-        console.log('v1');
 
         return filterOptions.value.brands.map(brand => ({
             value: brand.toLowerCase(),
             label: brand
         }));
+    });
+
+    // <number | null>
+    const minCarPrice = computed(() => {
+        return filterOptions.value?.priceRange.min ?? null
+    });
+
+    const maxCarPrice = computed(() => {
+        return filterOptions.value?.priceRange.max ?? null
+    });
+
+    const priceRange = computed(() => {
+        if (!filterOptions.value?.priceRange) return null
+
+        return filterOptions.value.priceRange
     });
 
     return {
@@ -339,6 +352,11 @@ export function useCarFilters() {
         seatCountOptions,
         fuelTypeOptions,
         brandOptions,
-        getFiltersSectionCount
+        priceRange,
+        isLoadingFilters,
+        getFiltersSectionCount,
+        minCarPrice,
+        maxCarPrice,
+        filterOptions
     };
 }

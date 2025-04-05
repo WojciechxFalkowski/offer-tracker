@@ -6,9 +6,10 @@ import {
     Param,
     Delete,
     NotFoundException,
+    Put,
 } from '@nestjs/common';
 import { TrackedUrlService } from './tracked-url.service';
-import { CreateTrackedUrlDto } from './tracked-url.dto';
+import { CreateTrackedUrlDto, UpdateTrackedUrlDto } from './tracked-url.dto';
 
 @Controller('tracked-urls')
 export class TrackedUrlController {
@@ -17,6 +18,11 @@ export class TrackedUrlController {
     @Post()
     async create(@Body() createTrackedUrlDto: CreateTrackedUrlDto) {
         return this.trackedUrlService.create(createTrackedUrlDto);
+    }
+
+    @Put(':id')
+    async update(@Param('id') id: string, @Body() updateTrackedUrlDto: UpdateTrackedUrlDto) {
+        return this.trackedUrlService.update(+id, updateTrackedUrlDto);
     }
 
     @Get()

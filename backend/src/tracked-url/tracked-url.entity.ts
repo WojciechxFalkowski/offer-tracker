@@ -1,10 +1,7 @@
-import { Car } from './../car/car.entity';
 import {
     Column,
     CreateDateColumn,
     Entity,
-    Index,
-    OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
@@ -20,8 +17,11 @@ export class TrackedUrl {
     @Column({ nullable: true })
     description: string;
 
-    @OneToMany(() => Car, (car) => car.trackedUrl, { cascade: true })
-    offers: Car[];
+    @Column({ nullable: true })
+    brand: string;
+
+    @Column({ nullable: true })
+    model: string;
 
     @CreateDateColumn()
     createdAt: Date;

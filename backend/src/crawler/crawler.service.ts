@@ -37,15 +37,7 @@ export class CrawlerService implements OnModuleInit {
 		const frequencyInMinutes = scrapingConfig?.frequencyInMinutes ?? 60;
 		const milliseconds = frequencyInMinutes * 60 * 1000;
 
-		console.log('scrapingConfig');
-		console.log(scrapingConfig);
-
-		console.log('frequencyInMinutes');
-		console.log(frequencyInMinutes);
-
-		console.log('milliseconds');
-		console.log(milliseconds);
-
+		console.log(`scheduleNextRun -> ${scrapingConfig?.frequencyInMinutes}`);
 
 		setTimeout(async () => {
 			await this.handleCron();

@@ -5,6 +5,7 @@
 
       <!-- Przycisk otwierający filtry z licznikiem -->
       <FilterDrawer
+        v-if="!isLoadingFilters"
         v-model="filters"
         :activeFiltersCount="activeFiltersCount"
         @apply="applyFilters"
@@ -21,19 +22,73 @@
           :activeFiltersCount="getFiltersSectionCount('basic')"
           :icon="IconBasic"
         >
-          <TextFilter
+          <!-- <TextFilter
             label="Marka"
             v-model="filters.brand"
             :options="brandOptions"
             @change="onBrandChange"
-          />
+          /> -->
 
-          <TextFilter
-            label="Model"
-            v-model="filters.model"
-            :options="modelOptions"
-            :disabled="!filters.brand"
-            @change="onModelChange"
+          <div>
+            <label
+              for="filter-brand"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Brand
+            </label>
+            <MultiSelect
+              id="filter-brand"
+              v-model="filters.brand"
+              :options="
+                brandOptions.map((brandOption) => ({
+                  name: brandOption.label,
+                  code: brandOption.value,
+                }))
+              "
+              optionLabel="name"
+              optionValue="code"
+              filter
+              class="w-full"
+            />
+          </div>
+
+          <div>
+            <label
+              for="filter-model"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Model
+            </label>
+            <MultiSelect
+              id="filter-model"
+              v-model="filters.model"
+              :options="modelOptions"
+              optionLabel="label"
+              filter
+              optionValue="value"
+              optionGroupLabel="label"
+              optionGroupChildren="items"
+              class="w-full"
+            >
+              <template #optiongroup="slotProps">
+                <div class="flex items-center">
+                  <img
+                    :alt="slotProps.option.label"
+                    src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png"
+                    :class="`flag flag-${slotProps.option.code.toLowerCase()} mr-2`"
+                    style="width: 18px"
+                  />
+                  <div>{{ slotProps.option.label }}</div>
+                </div>
+              </template>
+            </MultiSelect>
+          </div>
+
+          <CarPriceFilter
+            :min="priceRange.min"
+            :max="priceRange.max"
+            v-model:priceMin="filters.minPrice"
+            v-model:priceMax="filters.maxPrice"
           />
 
           <!-- <TextFilter
@@ -304,7 +359,7 @@ import FilterSkeleton from "@/components/filters/FilterSkeleton.vue";
 import CarCard from "@/components/car/CarCard.vue";
 import ContainerWrapper from "@/components/ContainerWrapper.vue";
 import Pagination from "@/components/Pagination.vue";
-
+import CarPriceFilter from "@/components/filters/CarPriceFilter.vue";
 // Importy ikon
 import IconBasic from "@/components/icons/IconBasic.vue";
 import IconEngine from "@/components/icons/IconEngine.vue";
@@ -313,6 +368,7 @@ import IconMetadata from "@/components/icons/IconMetadata.vue";
 import IconEmptyResults from "@/components/icons/IconEmptyResults.vue";
 import { prepareFiltersForApi, prepareFiltersForUrl } from "@/utils/filters";
 import { useCarFilters } from "@/composables/useCarFilters";
+import { MultiSelect, FloatLabel } from "primevue";
 
 const {
   filters,
@@ -324,7 +380,12 @@ const {
   seatCountOptions,
   fuelTypeOptions,
   brandOptions,
+  priceRange,
+  isLoadingFilters,
   getFiltersSectionCount,
+  minCarPrice,
+  maxCarPrice,
+  filterOptions,
 } = useCarFilters();
 // Router
 const router = useRouter();
@@ -339,7 +400,7 @@ const { fetchFilteredCars } = carStore;
 const isUpdatingUrl = ref(false);
 
 const sorting = ref({
-  field: "createdAt",
+  field: "publishedDate",
   direction: "desc",
 });
 
@@ -348,114 +409,43 @@ const pageSize = ref(12);
 const totalCars = ref(0);
 const totalPages = ref(1);
 
-// Opcje filtrów
-
-const modelOptions = ref<{ value: string; label: string }[]>([]);
-const versionOptions = ref<{ value: string; label: string }[]>([]);
-
-const onBrandChange = async (value: string) => {
-  if (value) {
-    // Pobierz modele dla wybranej marki
-    await fetchModels(value);
-  } else {
-    // Resetuj modele i wersje
-    modelOptions.value = [];
-    versionOptions.value = [];
-    filters.value.model = "";
-    filters.value.version = "";
-  }
-};
-
-const onModelChange = async (value: string) => {
-  if (value) {
-    // Pobierz wersje dla wybranego modelu
-    await fetchVersions(filters.value.brand, value);
-  } else {
-    // Resetuj wersje
-    versionOptions.value = [];
-    filters.value.version = "";
-  }
-};
-
-const fetchModels = async (brand: string) => {
-  try {
-    console.log("fetchModels");
-
-    // Tutaj normalnie byłoby zapytanie do API
-    // Symulacja opóźnienia i danych
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    if (brand === "audi") {
-      modelOptions.value = [
-        { value: "a3", label: "A3" },
-        { value: "a4", label: "A4" },
-        { value: "a6", label: "A6" },
-        { value: "q5", label: "Q5" },
-      ];
-    } else if (brand === "bmw") {
-      modelOptions.value = [
-        { value: "3", label: "Seria 3" },
-        { value: "5", label: "Seria 5" },
-        { value: "x3", label: "X3" },
-        { value: "x5", label: "X5" },
-      ];
-    } else {
-      modelOptions.value = [];
-    }
-  } catch (error) {
-    console.error("Błąd podczas pobierania modeli:", error);
-    modelOptions.value = [];
-  }
-};
-
-const fetchVersions = async (brand: string, model: string) => {
-  try {
-    // Tutaj normalnie byłoby zapytanie do API
-    // Symulacja opóźnienia i danych
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    if (brand === "audi" && model === "a4") {
-      versionOptions.value = [
-        { value: "2.0-tdi", label: "2.0 TDI" },
-        { value: "2.0-tfsi", label: "2.0 TFSI" },
-        { value: "3.0-tdi", label: "3.0 TDI" },
-        { value: "s4", label: "S4" },
-      ];
-    } else {
-      versionOptions.value = [];
-    }
-  } catch (error) {
-    console.error("Błąd podczas pobierania wersji:", error);
-    versionOptions.value = [];
-  }
-};
-
 // Funkcje do zarządzania URL
 const updateUrlFromFilters = () => {
   isUpdatingUrl.value = true;
 
-  const queryParams = prepareFiltersForUrl(filters.value);
+  // Krok 1: Pobierz URLSearchParams
+  const urlSearchParams = prepareFiltersForUrl(filters.value);
 
-  // Dodaj parametry sortowania
-  if (
-    sorting.value.field !== "createdAt" ||
-    sorting.value.direction !== "desc"
-  ) {
-    queryParams.sort = sorting.value.field;
-    queryParams.order = sorting.value.direction;
-  }
-
-  // Dodaj parametry paginacji
+  // Krok 2: Dodaj sortowanie i paginację
+  urlSearchParams.set("sort", sorting.value.field);
+  urlSearchParams.set("order", sorting.value.direction);
   if (page.value > 1) {
-    queryParams.page = page.value.toString();
+    urlSearchParams.set("page", page.value.toString());
   }
 
-  // Aktualizuj URL bez przeładowania strony
-  router.replace({
+  // Krok 3: Zamień na zwykły obiekt
+  const queryParams: Record<string, string | string[]> = {};
+  urlSearchParams.forEach((value, key) => {
+    // Obsługa wielu wartości dla tego samego klucza
+    if (queryParams[key]) {
+      if (Array.isArray(queryParams[key])) {
+        (queryParams[key] as string[]).push(value);
+      } else {
+        queryParams[key] = [queryParams[key] as string, value];
+      }
+    } else {
+      queryParams[key] = value;
+    }
+  });
+
+  console.log("queryParams", queryParams);
+
+  // Krok 4: Zmień URL
+  router.push({
     query: queryParams,
   });
 
-  // Resetuj flagę po krótkim opóźnieniu
+  // Resetuj flagę po krótkim czasie
   setTimeout(() => {
     isUpdatingUrl.value = false;
   }, 50);
@@ -502,8 +492,22 @@ const loadFiltersFromUrl = () => {
   });
 };
 
+const modelOptions = computed(() => {
+  return filterOptions.value.models.map((model) => {
+    return {
+      label: model.id,
+      code: model.id,
+      items: model.models.map((modelElement) => {
+        return {
+          label: modelElement,
+          value: modelElement,
+        };
+      }),
+    };
+  });
+});
+
 const applyFilters = async () => {
-  console.log("applyFilters");
   page.value = 1; // Resetuj stronę przy zmianie filtrów
   updateUrlFromFilters(); // Aktualizuj URL
   await fetchCars();
@@ -557,8 +561,6 @@ const clearAdvancedFilters = () => {
 };
 
 const fetchCars = async () => {
-  console.log("fetchCars");
-
   // Przygotuj parametry zapytania
   const queryParams = {
     page: page.value,

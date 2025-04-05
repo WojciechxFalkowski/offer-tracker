@@ -1,7 +1,7 @@
 // src/offer/offer.service.ts
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Car } from './car.entity';
 import { CarI } from 'src/crawler/crawler.types';
 import { CAR_REPOSITORY } from './car.contracts';
@@ -132,15 +132,31 @@ export class CarService {
         return result.map(item => item.year).filter(Boolean);
     }
 
-    private async getAllModels(): Promise<Record<string, string[]>> {
+    private async getAllModels(): Promise<{ id: string, models }[]> {
         const brands = await this.getBrands();
-        const modelsByBrand: Record<string, string[]> = {};
+        const modelsByBrand: { id: string, models }[] = [];
 
         for (const brand of brands) {
-            modelsByBrand[brand] = await this.getModels(brand);
+            // modelsByBrand[brand] = await this.getModels(brand);
+            const models = await this.getModels(brand);
+            modelsByBrand.push({ id: brand, models })
         }
 
         return modelsByBrand;
+    }
+
+    private async getMinMaxPrice(): Promise<{ min: number; max: number }> {
+        const result = await this.offerRepository
+            .createQueryBuilder('car')
+            .select('MIN(car.price)', 'min')
+            .addSelect('MAX(car.price)', 'max')
+            .where('car.price IS NOT NULL')
+            .getRawOne();
+
+        return {
+            min: Number(result.min),
+            max: Number(result.max)
+        };
     }
 
     public async getFilterOptions() {
@@ -154,7 +170,8 @@ export class CarService {
             seatCounts,
             driveTypes,
             brands,
-            models
+            models,
+            priceRange
         ] = await Promise.all([
             this.getYears(),
             this.getGearboxTypes(),
@@ -165,7 +182,8 @@ export class CarService {
             this.getSeatCounts(),
             this.getDriveTypes(),
             this.getBrands(),
-            this.getAllModels()
+            this.getAllModels(),
+            this.getMinMaxPrice()
         ]);
 
         return {
@@ -178,7 +196,8 @@ export class CarService {
             seatCounts,
             driveTypes,
             brands,
-            models
+            models,
+            priceRange
         };
     }
 
@@ -201,33 +220,36 @@ export class CarService {
     public async findAll(
         page: number = 1,
         pageSize: number = 12,
-        sort: string = 'createdAt',
+        sort: string = 'publishedDate',
         order: string = 'desc',
         filters: Record<string, any> = {},
     ): Promise<{ cars: ResponseCar[]; total: number }> {
-        // Przygotowanie parametrów paginacji
         const skip = (page - 1) * pageSize;
-        const take = pageSize;
 
-        // Przygotowanie parametrów sortowania
-        const orderBy = {
-            [sort]: order.toUpperCase()
-        };
+        const queryBuilder = this.offerRepository.createQueryBuilder('car')
+            .leftJoinAndSelect('car.details', 'details')
+            .leftJoinAndSelect('car.specification', 'specification')
+            .leftJoinAndSelect('car.images', 'images');
 
-        // Przygotowanie filtrów
+        // Przygotowanie filtrów (opcjonalnie)
         const where = this.prepareFilters(filters);
+        if (Object.keys(where).length > 0) {
+            queryBuilder.where(where);
+        }
 
-        console.log('filters');
-        console.log(filters);
-        
-        // Wykonanie zapytania z filtrami i paginacją
-        const [cars, total] = await this.offerRepository.findAndCount({
-            skip,
-            take,
-            order: orderBy,
-            where,
-            relations: ['details', 'specification', 'images']
-        });
+        // Mapowanie sortowania do odpowiednich tabel
+        let sortColumn: string;
+        if (['brand', 'model', 'productionYear'].includes(sort)) {
+            sortColumn = `details.${sort}`;
+        } else if (['fuelType', 'engineCapacity'].includes(sort)) {
+            sortColumn = `specification.${sort}`;
+        } else {
+            sortColumn = `car.${sort}`;
+        }
+
+        queryBuilder.orderBy(sortColumn, order.toUpperCase() as 'ASC' | 'DESC');
+
+        const [cars, total] = await queryBuilder.skip(skip).take(pageSize).getManyAndCount();
 
         return {
             cars: cars.map(mapCarToResponse),
@@ -239,26 +261,42 @@ export class CarService {
         const where: any = {};
 
         // Usuwamy parametry paginacji i sortowania
-        const { page, pageSize, sort, order, ...actualFilters } = filters;
+
+        const { page, pageSize, sort, order, priceFrom, priceTo, ...actualFilters } = filters;
+        // Obsługa filtru ceny
+        if (priceFrom && priceTo) {
+            where.price = Between(Number(priceFrom), Number(priceTo));
+        } else if (priceFrom) {
+            where.price = MoreThanOrEqual(Number(priceFrom));
+        } else if (priceTo) {
+            where.price = LessThanOrEqual(Number(priceTo));
+        }
 
         // Mapowanie filtrów z frontendu na strukturę bazy danych
         Object.entries(actualFilters).forEach(([key, value]) => {
             switch (key) {
                 case 'make':
-                    where.details = { ...where.details, brand: value };
+                    // Jeśli value jest tablicą, używamy operatora In, w przeciwnym razie przypisujemy wartość bez zmian
+                    where.details = {
+                        ...where.details,
+                        brand: Array.isArray(value) ? In(value) : value
+                    };
                     break;
                 case 'model':
-                    where.details = { ...where.details, model: value };
+                    where.details = {
+                        ...where.details,
+                        model: Array.isArray(value) ? In(value) : value
+                    };
                     break;
                 case 'trim':
                     where.details = { ...where.details, version: value };
                     break;
-                case 'priceFrom':
-                    where.price = { ...where.price, gte: value };
-                    break;
-                case 'priceTo':
-                    where.price = { ...where.price, lte: value };
-                    break;
+                // case 'priceFrom':
+                //     where.price = { ...where.price, gte: Number(value) };
+                //     break;
+                // case 'priceTo':
+                //     where.price = { ...where.price, lte: Number(value) };
+                //     break;
                 case 'yearFrom':
                     where.details = { ...where.details, productionYear: { gte: value } };
                     break;
@@ -312,5 +350,13 @@ export class CarService {
         });
 
         return await this.offerRepository.save(offer);
+    }
+
+    public async getBrandsAndModels(): Promise<{ brands: string[]; models: { id: string, models }[] }> {
+        const [brands, models] = await Promise.all([
+            this.getBrands(),
+            this.getAllModels()
+        ]);
+        return { brands, models };
     }
 }

@@ -9,5 +9,9 @@ export interface FilterOptions {
     seatCounts: string[];
     driveTypes: string[];
     brands: string[];
-    models: Record<string, string[]>;
+    models: { id: string, models }[];
+    priceRange: {
+        min: number,
+        max: number
+    }
 }

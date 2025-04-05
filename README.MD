@@ -175,9 +175,3 @@ Some potential enhancements:
 
 
 
-
-
-
-
-
-docker network create offer-track-network

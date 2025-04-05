@@ -2,14 +2,12 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    ManyToOne,
     OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
     JoinColumn,
     OneToMany,
 } from 'typeorm';
-import { TrackedUrl } from '../tracked-url/tracked-url.entity';
 import { CarDetails } from './car-details.entity';
 import { CarImage } from './car-image.entity';
 import { CarSpecification } from './car-specification.entity';
@@ -40,14 +38,6 @@ export class Car {
 
     @UpdateDateColumn()
     updatedAt: Date;
-
-    // Relacja do `TrackedUrl` z kluczem obcym `trackedUrlId`
-    @ManyToOne(() => TrackedUrl, (trackedUrl) => trackedUrl.offers, {
-        onDelete: 'SET NULL', // Nie usuwaj ofert, ustaw pole na NULL
-        eager: true,
-    })
-    @JoinColumn({ name: 'trackedUrlId' })
-    trackedUrl: TrackedUrl | null;
 
     // Relacja 1:1 do szczegółów samochodu
     @OneToOne(() => CarDetails, { cascade: true, eager: true })

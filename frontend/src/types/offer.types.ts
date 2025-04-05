@@ -8,8 +8,8 @@ export interface Offer {
     url: string;
     specification: CarSpecification;
     details: CarDetails;
-    publishedDate: Date | null | undefined;
-    createdAt: Date;
+    publishedDate: string | null | undefined;
+    createdAt: string;
     updatedAt: Date;
     trackedUrlId: number | null; // Dodane pole
 }

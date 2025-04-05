@@ -10,13 +10,13 @@
     <div class="flex flex-col h-full p-4 gap-4">
       <div class="flex justify-between items-start">
         <h2
-          class="text-lg font-bold text-gray-800 mb-1 truncate overflow-hidden text-ellipsis"
+          class="font-bold text-gray-800 mb-1 truncate overflow-hidden text-ellipsis"
           :title="car.title"
         >
           {{ car.title }}
         </h2>
 
-        <span class="text-lg font-bold text-blue-600 text-nowrap"
+        <span class="font-bold text-blue-600 text-nowrap"
           >{{ car.price }} zł</span
         >
       </div>
@@ -48,13 +48,21 @@
 
       <!-- Przyciski akcji -->
       <div class="flex justify-between items-center mt-auto">
-        <span v-if="car.publishedDate" class="text-xs text-gray-500">
-          Opublikowano: {{ new Date(car.publishedDate).toLocaleDateString() }}
-        </span>
+        <div class="flex flex-col">
+          <span class="text-xs text-gray-500">
+            Opublikowano:
+            <span v-if="car.publishedDate">
+              {{ formatTimeToDate(car.publishedDate) }}
+            </span>
 
-        <span v-else class="text-xs text-gray-500">
-          Dodano: {{ new Date(car.createdAt).toLocaleDateString() }}
-        </span>
+            <span v-else>-</span>
+          </span>
+
+          <span class="text-xs text-gray-500">
+            Dodano: {{ formatTimeToDate(car.createdAt) }}
+          </span>
+        </div>
+
         <a
           :href="car.url"
           target="_blank"
@@ -105,6 +113,7 @@ import { Offer } from "@/types/offer.types";
 import CarImageCarousel from "./CarImageCarousel.vue";
 import CarInfoField from "@/components/car/CarInfoField.vue";
 import CarInfoSection from "@/components/car/CarInfoSection.vue";
+import { formatTimeToDate } from "@/utils/dates";
 
 const props = defineProps({
   car: {
