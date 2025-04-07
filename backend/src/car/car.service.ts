@@ -10,6 +10,7 @@ import { CarImage } from './car-image.entity';
 import { CarSpecification } from './car-specification.entity';
 import { mapCarToResponse } from './mappers/car.mapper';
 import { ResponseCar } from './dto/response-car.dto';
+import { IsNull } from 'typeorm';
 
 @Injectable()
 export class CarService {
@@ -403,5 +404,25 @@ export class CarService {
 
         // Then remove the car (which will cascade delete details and specification)
         await this.offerRepository.remove(car);
+    }
+
+    public async findCarsWithMissingDates(): Promise<Car[]> {
+        return await this.offerRepository.find({
+            where: { publishedDate: IsNull() },
+            select: ['id', 'url']
+        });
+    }
+
+    public async updateCarDate(id: number, date: string): Promise<void> {
+        const car = await this.offerRepository.findOne({
+            where: { id }
+        });
+
+        if (!car) {
+            throw new NotFoundException(`Car with ID ${id} not found`);
+        }
+
+        car.publishedDate = new Date(date);
+        await this.offerRepository.save(car);
     }
 }

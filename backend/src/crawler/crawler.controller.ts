@@ -1,4 +1,4 @@
-import { Controller, Post, Logger, Body, BadRequestException, InternalServerErrorException, NotFoundException, HttpException } from '@nestjs/common';
+import { Controller, Post, Logger, Body, BadRequestException, InternalServerErrorException, NotFoundException, HttpException, Get } from '@nestjs/common';
 import { CrawlerService } from './crawler.service';
 
 @Controller('crawler')
@@ -50,9 +50,6 @@ export class CrawlerController {
 
       const result = await this.crawlerService.crawlAllTrackedUrls(body.trackedUrls, { autoSave: false });
 
-      // console.log('result');
-      // console.log(result);
-
       this.logger.log(`Successfully crawled URL ID: ${result}, found ${result.offers.length} offers`);
 
       return {
@@ -75,4 +72,13 @@ export class CrawlerController {
     }
   }
 
+  @Get('missing-dates')
+  async getCarsWithMissingDates(): Promise<{ urls: string[] }> {
+    return await this.crawlerService.getCarsWithMissingDates();
+  }
+
+  @Post('update-dates')
+  async updateMissingDates(): Promise<{ updated: number }> {
+    return await this.crawlerService.updateMissingDates();
+  }
 }

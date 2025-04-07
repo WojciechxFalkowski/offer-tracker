@@ -1025,4 +1025,44 @@ export class CrawlerService implements OnModuleInit {
 		return { date: formattedDate, id: extractedId, errorCount, successCount };
 	}
 
+	public async getCarsWithMissingDates(): Promise<{ urls: string[] }> {
+		const cars = await this.offerService.findCarsWithMissingDates();
+		return {
+			urls: cars.map(car => car.url)
+		};
+	}
+
+	public async updateMissingDates(): Promise<{ updated: number }> {
+		console.time('updateMissingDates');
+		const cars = await this.offerService.findCarsWithMissingDates();
+		let updatedCount = 0;
+		let offersCount = 0;
+		for (const car of cars) {
+			offersCount++;
+			console.log(`Updating date for car ${offersCount} of ${cars.length}`);
+			try {
+				const { browser, page } = await createBrowserPage();
+				try {
+					console.time('updateMissingDate');
+					await page.goto(car.url, { waitUntil: 'networkidle', timeout: this.NAVIGATION_TIMEOUT });
+					await handleCookieBanner(page);
+
+					const { date: formattedDate } = await this.extractFormattedDate(page);
+					if (formattedDate) {
+						await this.offerService.updateCarDate(car.id, formattedDate);
+						updatedCount++;
+					}
+					console.timeEnd('updateMissingDate');
+				} finally {
+					await browser.close();
+					console.log(`Updated date for car ${offersCount} of ${cars.length}`);
+				}
+			} catch (error) {
+				this.logger.error(`Error updating date for car ${car.id}:`, error);
+			}
+		}
+		console.timeEnd('updateMissingDates');
+		return { updated: updatedCount };
+	}
+
 }
