@@ -372,7 +372,7 @@ export class CrawlerService implements OnModuleInit {
 			console.log(`❌ Wystąpiły błędy przy ${errorCount} polach.`);
 
 			return {
-				date: offerDate,
+				publishedDate: offerDate,
 				url: offerUrl,
 				details,
 				specification,

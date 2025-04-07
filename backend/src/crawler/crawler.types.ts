@@ -2,7 +2,7 @@
 export interface CarI {
     offerId: string;
     url: string;
-    date: string;
+    publishedDate: string;
     originalDate: string;
     details: CarDetails;
     specification: CarSpecification;

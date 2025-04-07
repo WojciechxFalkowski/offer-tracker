@@ -1,5 +1,5 @@
 // src/offer/offer.controller.ts
-import { Controller, Get, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
+import { Controller, Get, Query, ParseIntPipe, DefaultValuePipe, Delete, Param } from '@nestjs/common';
 import { CarService } from './car.service';
 import { ResponseCar } from './dto/response-car.dto';
 
@@ -50,5 +50,8 @@ export class CarController {
         return await this.offerService.getFilterOptions();
     }
 
-
+    @Delete(':id')
+    async remove(@Param('id') id: string): Promise<void> {
+        await this.offerService.remove(+id);
+    }
 }

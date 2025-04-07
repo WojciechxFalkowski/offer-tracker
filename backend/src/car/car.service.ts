@@ -1,5 +1,5 @@
 // src/offer/offer.service.ts
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Car } from './car.entity';
@@ -324,6 +324,26 @@ export class CarService {
         return mapCarToResponse(car);
     }
 
+    private convertPolishDateToJSDate(polishDate: string): Date {
+        const months = {
+            'stycznia': '01', 'lutego': '02', 'marca': '03', 'kwietnia': '04',
+            'maja': '05', 'czerwca': '06', 'lipca': '07', 'sierpnia': '08',
+            'września': '09', 'października': '10', 'listopada': '11', 'grudnia': '12'
+        };
+
+        // Zamień polskie nazwy miesięcy na numery
+        let dateStr = polishDate;
+        for (const [polishMonth, monthNumber] of Object.entries(months)) {
+            dateStr = dateStr.replace(polishMonth, monthNumber);
+        }
+
+        // Zamień na format YYYY-MM-DD HH:mm
+        const [day, month, year, time] = dateStr.split(' ');
+        const formattedDate = `${year}-${month}-${day.padStart(2, '0')} ${time}`;
+
+        return new Date(formattedDate);
+    }
+
     public async createFromCar(car: CarI): Promise<Car> {
         const offer = new Car();
 
@@ -331,7 +351,8 @@ export class CarService {
         offer.title = `${car.details.brand} ${car.details.model} ${car.details.version}`.trim();
         offer.externalId = car.url.split('/').pop() || '';
         offer.price = car.price;
-        offer.publishedDate = new Date(car.originalDate)
+        offer.publishedDate = this.convertPolishDateToJSDate(car.originalDate);
+
         // Tworzenie szczegółów samochodu
         const carDetails = new CarDetails();
         Object.assign(carDetails, car.details);
@@ -358,5 +379,29 @@ export class CarService {
             this.getAllModels()
         ]);
         return { brands, models };
+    }
+
+    public async remove(id: number): Promise<void> {
+        const car = await this.offerRepository.findOne({
+            where: { id },
+            relations: ['details', 'specification', 'images']
+        });
+
+        if (!car) {
+            throw new NotFoundException(`Car with ID ${id} not found`);
+        }
+
+        // First remove the images
+        if (car.images && car.images.length > 0) {
+            await this.offerRepository
+                .createQueryBuilder()
+                .delete()
+                .from('car_images')
+                .where('offerId = :id', { id })
+                .execute();
+        }
+
+        // Then remove the car (which will cascade delete details and specification)
+        await this.offerRepository.remove(car);
     }
 }
