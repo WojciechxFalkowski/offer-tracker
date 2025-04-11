@@ -57,12 +57,12 @@ export const prepareFiltersForApi = (filters: Record<string, any>): ApiFilters =
                 break;
             case "minYear":
                 if (typeof value === "number") {
-                    apiFilters.yearFrom = value;
+                    apiFilters.minYear = value;
                 }
                 break;
             case "maxYear":
                 if (typeof value === "number") {
-                    apiFilters.yearTo = value;
+                    apiFilters.maxYear = value;
                 }
                 break;
             case "brand":

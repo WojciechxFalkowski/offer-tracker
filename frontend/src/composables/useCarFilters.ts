@@ -12,9 +12,11 @@ export function useCarFilters() {
         version: "",
         minPrice: null as number | null,
         maxPrice: null as number | null,
+        minYear: null as number | null,
+        maxYear: null as number | null,
+        fuelType: [] as string[],
 
         // Specyfikacja techniczna
-        fuelType: [] as string[],
         minEngineCapacity: null as number | null,
         maxEngineCapacity: null as number | null,
         minPower: null as number | null,
@@ -29,8 +31,6 @@ export function useCarFilters() {
         colors: [] as string[],
         doorCount: null as number | null,
         seatCount: null as number | null,
-        minYear: null as number | null,
-        maxYear: null as number | null,
         generation: "",
         vin: "",
 
@@ -310,13 +310,13 @@ export function useCarFilters() {
         { value: 9, label: "9" },
     ]);
 
-    const fuelTypeOptions = ref([
-        { value: "petrol", label: "Benzyna" },
-        { value: "diesel", label: "Diesel" },
-        { value: "hybrid", label: "Hybryda" },
-        { value: "electric", label: "Elektryczny" },
-        { value: "lpg", label: "LPG" },
-    ]);
+    const fuelTypeOptions = computed(() => {
+        if (!filterOptions.value?.fuelTypes) return [];
+        return filterOptions.value.fuelTypes.map(fuel => ({
+            value: fuel,
+            label: fuel
+        }));
+    });
 
     const brandOptions = computed(() => {
         if (!filterOptions.value?.brands) return [];
@@ -324,6 +324,14 @@ export function useCarFilters() {
         return filterOptions.value.brands.map(brand => ({
             value: brand.toLowerCase(),
             label: brand
+        }));
+    });
+
+    const yearOptions = computed(() => {
+        if (!filterOptions.value?.years) return [];
+        return filterOptions.value.years.map(year => ({
+            value: year,
+            label: year
         }));
     });
 
@@ -352,6 +360,7 @@ export function useCarFilters() {
         seatCountOptions,
         fuelTypeOptions,
         brandOptions,
+        yearOptions,
         priceRange,
         isLoadingFilters,
         getFiltersSectionCount,

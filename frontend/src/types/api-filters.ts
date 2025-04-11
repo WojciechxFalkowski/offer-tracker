@@ -1,8 +1,8 @@
 interface ApiFilters {
     priceFrom?: number;
     priceTo?: number;
-    yearFrom?: number;
-    yearTo?: number;
+    minYear?: number;
+    maxYear?: number;
     make?: string | string[];
     model?: string | string[];
     trim?: string;

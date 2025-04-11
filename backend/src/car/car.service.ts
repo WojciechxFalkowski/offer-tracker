@@ -262,8 +262,8 @@ export class CarService {
         const where: any = {};
 
         // Usuwamy parametry paginacji i sortowania
+        const { page, pageSize, sort, order, priceFrom, priceTo, minYear, maxYear, fuel, ...actualFilters } = filters;
 
-        const { page, pageSize, sort, order, priceFrom, priceTo, ...actualFilters } = filters;
         // Obsługa filtru ceny
         if (priceFrom && priceTo) {
             where.price = Between(Number(priceFrom), Number(priceTo));
@@ -273,11 +273,32 @@ export class CarService {
             where.price = LessThanOrEqual(Number(priceTo));
         }
 
+        // Obsługa filtru roku produkcji
+        if (minYear || maxYear) {
+            where.details = {
+                ...where.details,
+                productionYear: {}
+            };
+            if (minYear) {
+                where.details.productionYear = MoreThanOrEqual(Number(minYear));
+            }
+            if (maxYear) {
+                where.details.productionYear = LessThanOrEqual(Number(maxYear));
+            }
+        }
+
+        // Obsługa filtru paliwa
+        if (fuel) {
+            where.specification = {
+                ...where.specification,
+                fuelType: Array.isArray(fuel) ? In(fuel) : fuel
+            };
+        }
+
         // Mapowanie filtrów z frontendu na strukturę bazy danych
         Object.entries(actualFilters).forEach(([key, value]) => {
             switch (key) {
                 case 'make':
-                    // Jeśli value jest tablicą, używamy operatora In, w przeciwnym razie przypisujemy wartość bez zmian
                     where.details = {
                         ...where.details,
                         brand: Array.isArray(value) ? In(value) : value
@@ -292,23 +313,12 @@ export class CarService {
                 case 'trim':
                     where.details = { ...where.details, version: value };
                     break;
-                // case 'priceFrom':
-                //     where.price = { ...where.price, gte: Number(value) };
-                //     break;
-                // case 'priceTo':
-                //     where.price = { ...where.price, lte: Number(value) };
-                //     break;
-                case 'yearFrom':
-                    where.details = { ...where.details, productionYear: { gte: value } };
+                case 'minYear':
+                    where.details = { ...where.details, productionYear: MoreThanOrEqual(Number(value)) };
                     break;
-                case 'yearTo':
-                    where.details = { ...where.details, productionYear: { lte: value } };
+                case 'maxYear':
+                    where.details = { ...where.details, productionYear: LessThanOrEqual(Number(value)) };
                     break;
-                case 'fuel':
-                    where.specification = { ...where.specification, fuelType: value };
-                    break;
-                // Dodaj więcej mapowań dla pozostałych filtrów
-                // ...
             }
         });
 

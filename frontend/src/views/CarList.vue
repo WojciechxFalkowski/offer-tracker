@@ -91,6 +91,60 @@
             v-model:priceMax="filters.maxPrice"
           />
 
+          <div>
+            <label
+              for="filter-fuel-type"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Rodzaj paliwa
+            </label>
+            <MultiSelect
+              id="filter-fuel-type"
+              v-model="filters.fuelType"
+              :options="fuelTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              filter
+              class="w-full"
+            />
+          </div>
+
+          <div>
+            <label
+              for="filter-year-from"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Rok produkcji od
+            </label>
+            <MultiSelect
+              id="filter-year-from"
+              v-model="filters.minYear"
+              :options="yearOptions"
+              optionLabel="label"
+              optionValue="value"
+              filter
+              class="w-full"
+            />
+          </div>
+
+          <div>
+            <label
+              for="filter-year-to"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Rok produkcji do
+            </label>
+            <MultiSelect
+              id="filter-year-to"
+              v-model="filters.maxYear"
+              :options="yearOptions"
+              optionLabel="label"
+              optionValue="value"
+              filter
+              class="w-full"
+            />
+          </div>
+
           <!-- <TextFilter
             label="Wersja"
             v-model="filters.version"
@@ -380,6 +434,7 @@ const {
   seatCountOptions,
   fuelTypeOptions,
   brandOptions,
+  yearOptions,
   priceRange,
   isLoadingFilters,
   getFiltersSectionCount,
