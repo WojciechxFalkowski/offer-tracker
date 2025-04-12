@@ -9,9 +9,10 @@ import { TrackedUrlModule } from './tracked-url/tracked-url.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CarModule } from './car/car.module';
 import { SettingsModule } from './settings/settings.module';
+import { CarPriceHistoryModule } from './car-price-history/car-price-history.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ load: [configuration], isGlobal: true, cache: true, }), ScheduleModule.forRoot(), DatabaseModule, SettingsModule, TrackedUrlModule, CrawlerModule, CarModule],
+  imports: [ConfigModule.forRoot({ load: [configuration], isGlobal: true, cache: true, }), ScheduleModule.forRoot(), DatabaseModule, SettingsModule, TrackedUrlModule, CrawlerModule, CarModule, CarPriceHistoryModule],
   controllers: [AppController],
   providers: [AppService],
 })

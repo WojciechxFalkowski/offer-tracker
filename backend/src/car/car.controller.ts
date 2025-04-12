@@ -1,5 +1,5 @@
 // src/offer/offer.controller.ts
-import { Controller, Get, Query, ParseIntPipe, DefaultValuePipe, Delete, Param } from '@nestjs/common';
+import { Controller, Get, Query, ParseIntPipe, DefaultValuePipe, Delete, Param, Post } from '@nestjs/common';
 import { CarService } from './car.service';
 import { ResponseCar } from './dto/response-car.dto';
 
@@ -54,4 +54,9 @@ export class CarController {
     async remove(@Param('id') id: string): Promise<void> {
         await this.offerService.remove(+id);
     }
+
+    // @Post('process-batch')
+    // async processNextBatch() {
+    //     return await this.carPriceTrackerService.processNextBatch();
+    // }
 }

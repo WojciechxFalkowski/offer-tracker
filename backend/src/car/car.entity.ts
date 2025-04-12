@@ -11,7 +11,7 @@ import {
 import { CarDetails } from './car-details.entity';
 import { CarImage } from './car-image.entity';
 import { CarSpecification } from './car-specification.entity';
-import { Expose, Transform } from 'class-transformer';
+import { CarPriceHistory } from '@/car-price-history/car-price-history.entity';
 
 @Entity('cars')
 export class Car {
@@ -33,6 +33,9 @@ export class Car {
     @Column({ type: 'datetime', nullable: true })
     publishedDate: Date | null;
 
+    @Column({ default: true })
+    isActive: boolean;
+
     @CreateDateColumn()
     createdAt: Date;
 
@@ -52,4 +55,8 @@ export class Car {
     // Relacja 1:N do obrazów samochodu
     @OneToMany(() => CarImage, (image) => image.offer, { cascade: true, eager: true })
     images: CarImage[];
+
+    // Relacja 1:N do historii cen
+    @OneToMany(() => CarPriceHistory, priceHistory => priceHistory.car)
+    priceHistory: CarPriceHistory[];
 }

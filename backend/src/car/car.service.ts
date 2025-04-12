@@ -1,7 +1,7 @@
 // src/offer/offer.service.ts
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, In, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { Car } from './car.entity';
 import { CarI } from 'src/crawler/crawler.types';
 import { CAR_REPOSITORY } from './car.contracts';
@@ -226,18 +226,15 @@ export class CarService {
         filters: Record<string, any> = {},
     ): Promise<{ cars: ResponseCar[]; total: number }> {
         const skip = (page - 1) * pageSize;
-
         const queryBuilder = this.offerRepository.createQueryBuilder('car')
             .leftJoinAndSelect('car.details', 'details')
             .leftJoinAndSelect('car.specification', 'specification')
             .leftJoinAndSelect('car.images', 'images');
-
         // Przygotowanie filtrów (opcjonalnie)
         const where = this.prepareFilters(filters);
         if (Object.keys(where).length > 0) {
             queryBuilder.where(where);
         }
-
         // Mapowanie sortowania do odpowiednich tabel
         let sortColumn: string;
         if (['brand', 'model', 'productionYear'].includes(sort)) {
@@ -247,11 +244,8 @@ export class CarService {
         } else {
             sortColumn = `car.${sort}`;
         }
-
         queryBuilder.orderBy(sortColumn, order.toUpperCase() as 'ASC' | 'DESC');
-
         const [cars, total] = await queryBuilder.skip(skip).take(pageSize).getManyAndCount();
-
         return {
             cars: cars.map(mapCarToResponse),
             total
@@ -434,5 +428,23 @@ export class CarService {
 
         car.publishedDate = new Date(date);
         await this.offerRepository.save(car);
+    }
+
+    public async getActiveCarsAfterId(
+        lastCheckedId: number,
+        limit: number = 100,
+    ): Promise<Car[]> {
+        return await this.offerRepository.find({
+            where: {
+                id: MoreThan(lastCheckedId),
+                isActive: true,
+            },
+            order: { id: 'ASC' },
+            take: limit,
+        });
+    }
+
+    public async save(car: Car): Promise<Car> {
+        return await this.offerRepository.save(car);
     }
 }

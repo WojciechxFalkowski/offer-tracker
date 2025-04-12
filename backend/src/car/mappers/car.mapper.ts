@@ -13,6 +13,7 @@ export const mapCarToResponse = (car: Car): ResponseCar => {
         createdAt: car.createdAt,
         updatedAt: car.updatedAt,
         publishedDate: car.publishedDate ?? null,
+        isActive: car.isActive,
         details: {
             brand: car.details.brand,
             model: car.details.model,

@@ -27,6 +27,7 @@ export class TrackedUrlService {
 
         const trackedUrlsWithCounts = await Promise.all(
             trackedUrls.map(async (trackedUrl) => {
+
                 let matchingCarsCount = 0;
 
                 if (trackedUrl.brand && trackedUrl.model) {
@@ -42,7 +43,6 @@ export class TrackedUrlService {
                     );
                     matchingCarsCount = total;
                 }
-
                 return {
                     ...trackedUrl,
                     matchingCarsCount

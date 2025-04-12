@@ -10,6 +10,7 @@ export interface ResponseCar {
     createdAt: Date;
     updatedAt: Date;
     trackedUrlId?: number | null;
+    isActive: boolean;
     details: {
         brand: string;
         model: string;

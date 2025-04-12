@@ -873,8 +873,6 @@ export class CrawlerService implements OnModuleInit {
 			}
 			const integerPart = priceText.split(',')[0].replace(/\D/g, '');
 			const intPrice = parseInt(integerPart, 10);
-			console.log('intPrice');
-			console.log(intPrice);
 
 			extractedPrice = intPrice ?? 0;
 
@@ -1063,6 +1061,43 @@ export class CrawlerService implements OnModuleInit {
 		}
 		console.timeEnd('updateMissingDates');
 		return { updated: updatedCount };
+	}
+
+	public async checkCarOffer(url: string): Promise<{ price: number } | null> {
+		const { browser, page } = await createBrowserPage();
+		this.logger.log(`Checking car offer: ${url}`);
+
+		try {
+			try {
+				await page.goto(url, { waitUntil: 'networkidle', timeout: this.NAVIGATION_TIMEOUT });
+			} catch (error) {
+				this.logger.error(`Timeout or navigation error for offer URL: ${url}`, error);
+				return null; // Strona nie istnieje lub jest niedostępna
+			}
+
+			await handleCookieBanner(page);
+
+			// Sprawdź czy strona zawiera komunikat o nieistnieniu oferty
+			const notFoundElement = await page.$('text="Przepraszamy, ale ogłoszenie, którego szukasz, nie istnieje."');
+			if (notFoundElement) {
+				this.logger.log(`Offer no longer exists: ${url}`);
+				return null;
+			}
+
+			// Pobierz cenę
+			const { price } = await this.extractOfferPrice(page);
+			if (!price) {
+				this.logger.error(`Could not extract price for offer: ${url}`);
+				return null;
+			}
+
+			return { price };
+		} catch (error) {
+			this.logger.error(`Error checking car offer ${url}:`, error);
+			return null;
+		} finally {
+			await browser.close();
+		}
 	}
 
 }
