@@ -350,11 +350,14 @@ export class CarService {
     }
 
     public async createFromCar(car: CarI): Promise<Car> {
+        console.log("createFromCar");
+        
         const offer = new Car();
 
         offer.url = car.url;
         offer.title = `${car.details.brand} ${car.details.model} ${car.details.version}`.trim();
-        offer.externalId = car.url.split('/').pop() || '';
+        offer.externalId = car.offerId;
+        offer.shortenedUrl = car.url.split('/').pop() || '';
         offer.price = car.price;
         offer.publishedDate = this.convertPolishDateToJSDate(car.originalDate);
 
@@ -412,8 +415,11 @@ export class CarService {
 
     public async findCarsWithMissingDates(): Promise<Car[]> {
         return await this.offerRepository.find({
-            where: { publishedDate: IsNull() },
-            select: ['id', 'url']
+            where: [
+                { publishedDate: IsNull(), isActive: true },
+                { externalId: IsNull(), isActive: true }
+            ],
+            select: ['id', 'url', 'publishedDate', 'externalId']
         });
     }
 

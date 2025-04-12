@@ -38,7 +38,7 @@ export class CrawlerController {
    * @returns An object containing the list of car offers and the ID of the tracked URL
    */
   @Post('crawl-urls')
-  async crawlTrackedUrls(@Body() body: { trackedUrls: string[] }) {
+  async crawlTrackedUrls(@Body() body: { trackedUrls: string[], autoSave: boolean }) {
     this.logger.log('Manually triggered crawling of provided tracked URLs');
 
     try {
@@ -48,7 +48,7 @@ export class CrawlerController {
 
       this.logger.log(`Processing ${body.trackedUrls.length} tracked URLs from request`);
 
-      const result = await this.crawlerService.crawlAllTrackedUrls(body.trackedUrls, { autoSave: false });
+      const result = await this.crawlerService.crawlAllTrackedUrls(body.trackedUrls, { autoSave: body.autoSave || false });
 
       this.logger.log(`Successfully crawled URL ID: ${result}, found ${result.offers.length} offers`);
 

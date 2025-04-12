@@ -4,24 +4,15 @@
       <h1 class="text-2xl font-bold text-gray-800">Oferty samochodów</h1>
 
       <!-- Przycisk otwierający filtry z licznikiem -->
-      <FilterDrawer
-        v-if="!isLoadingFilters"
-        v-model="filters"
-        :activeFiltersCount="activeFiltersCount"
-        @apply="applyFilters"
-        @clear="clearAllFilters"
-      >
+      <FilterDrawer v-if="!isLoadingFilters" v-model="filters" :activeFiltersCount="activeFiltersCount"
+        @apply="applyFilters" @clear="clearAllFilters">
         <!-- Sekcja sortowania -->
         <div class="mb-6 pb-4 border-b border-gray-200">
           <SortingOptions v-model="sorting" @change="updateSorting" />
         </div>
 
         <!-- Sekcja filtrów podstawowych -->
-        <FilterSection
-          title="Podstawowe"
-          :activeFiltersCount="getFiltersSectionCount('basic')"
-          :icon="IconBasic"
-        >
+        <FilterSection title="Podstawowe" :activeFiltersCount="getFiltersSectionCount('basic')" :icon="IconBasic">
           <!-- <TextFilter
             label="Marka"
             v-model="filters.brand"
@@ -30,119 +21,58 @@
           /> -->
 
           <div>
-            <label
-              for="filter-brand"
-              class="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label for="filter-brand" class="block text-sm font-medium text-gray-700 mb-1">
               Brand
             </label>
-            <MultiSelect
-              id="filter-brand"
-              v-model="filters.brand"
-              :options="
-                brandOptions.map((brandOption) => ({
-                  name: brandOption.label,
-                  code: brandOption.value,
-                }))
-              "
-              optionLabel="name"
-              optionValue="code"
-              filter
-              class="w-full"
-            />
+            <MultiSelect id="filter-brand" v-model="filters.brand" :options="brandOptions.map((brandOption) => ({
+              name: brandOption.label,
+              code: brandOption.value,
+            }))
+              " optionLabel="name" optionValue="code" filter class="w-full" />
           </div>
 
           <div>
-            <label
-              for="filter-model"
-              class="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label for="filter-model" class="block text-sm font-medium text-gray-700 mb-1">
               Model
             </label>
-            <MultiSelect
-              id="filter-model"
-              v-model="filters.model"
-              :options="modelOptions"
-              optionLabel="label"
-              filter
-              optionValue="value"
-              optionGroupLabel="label"
-              optionGroupChildren="items"
-              class="w-full"
-            >
+            <MultiSelect id="filter-model" v-model="filters.model" :options="modelOptions" optionLabel="label" filter
+              optionValue="value" optionGroupLabel="label" optionGroupChildren="items" class="w-full">
               <template #optiongroup="slotProps">
                 <div class="flex items-center">
-                  <img
-                    :alt="slotProps.option.label"
+                  <img :alt="slotProps.option.label"
                     src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png"
-                    :class="`flag flag-${slotProps.option.code.toLowerCase()} mr-2`"
-                    style="width: 18px"
-                  />
+                    :class="`flag flag-${slotProps.option.code.toLowerCase()} mr-2`" style="width: 18px" />
                   <div>{{ slotProps.option.label }}</div>
                 </div>
               </template>
             </MultiSelect>
           </div>
 
-          <CarPriceFilter
-            :min="priceRange.min"
-            :max="priceRange.max"
-            v-model:priceMin="filters.minPrice"
-            v-model:priceMax="filters.maxPrice"
-          />
+          <CarPriceFilter :min="priceRange.min" :max="priceRange.max" v-model:priceMin="filters.minPrice"
+            v-model:priceMax="filters.maxPrice" />
 
           <div>
-            <label
-              for="filter-fuel-type"
-              class="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label for="filter-fuel-type" class="block text-sm font-medium text-gray-700 mb-1">
               Rodzaj paliwa
             </label>
-            <MultiSelect
-              id="filter-fuel-type"
-              v-model="filters.fuelType"
-              :options="fuelTypeOptions"
-              optionLabel="label"
-              optionValue="value"
-              filter
-              class="w-full"
-            />
+            <MultiSelect id="filter-fuel-type" v-model="filters.fuelType" :options="fuelTypeOptions" optionLabel="label"
+              optionValue="value" filter class="w-full" />
           </div>
 
           <div>
-            <label
-              for="filter-year-from"
-              class="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label for="filter-year-from" class="block text-sm font-medium text-gray-700 mb-1">
               Rok produkcji od
             </label>
-            <MultiSelect
-              id="filter-year-from"
-              v-model="filters.minYear"
-              :options="yearOptions"
-              optionLabel="label"
-              optionValue="value"
-              filter
-              class="w-full"
-            />
+            <MultiSelect id="filter-year-from" v-model="filters.minYear" :options="yearOptions" optionLabel="label"
+              optionValue="value" filter class="w-full" />
           </div>
 
           <div>
-            <label
-              for="filter-year-to"
-              class="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label for="filter-year-to" class="block text-sm font-medium text-gray-700 mb-1">
               Rok produkcji do
             </label>
-            <MultiSelect
-              id="filter-year-to"
-              v-model="filters.maxYear"
-              :options="yearOptions"
-              optionLabel="label"
-              optionValue="value"
-              filter
-              class="w-full"
-            />
+            <MultiSelect id="filter-year-to" v-model="filters.maxYear" :options="yearOptions" optionLabel="label"
+              optionValue="value" filter class="w-full" />
           </div>
 
           <!-- <TextFilter
@@ -309,19 +239,12 @@
     </div>
 
     <!-- Aktywne filtry -->
-    <ActiveFilters
-      v-if="formattedActiveFilters.length > 0"
-      :filters="formattedActiveFilters"
-      @remove="removeFilter"
-      @clear-all="clearAllFilters"
-      class="mb-4"
-    />
+    <ActiveFilters v-if="formattedActiveFilters.length > 0" :filters="formattedActiveFilters" @remove="removeFilter"
+      @clear-all="clearAllFilters" class="mb-4" />
 
     <!-- Wyniki wyszukiwania -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-      <div
-        class="p-6 border-b border-gray-200 flex justify-between items-center"
-      >
+      <div class="p-6 border-b border-gray-200 flex justify-between items-center">
         <div>
           <h2 class="text-xl font-semibold text-gray-800">Znalezione oferty</h2>
           <p class="text-sm text-gray-500 mt-1">
@@ -351,20 +274,15 @@
             Nie znaleziono ofert spełniających podane kryteria.
           </p>
 
-          <button
-            @click="() => clearAllFilters(true)"
-            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button @click="() => clearAllFilters(true)"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
             Wyczyść wszystkie filtry
           </button>
         </div>
       </div>
 
       <!-- Lista samochodów -->
-      <div
-        v-else
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4"
-      >
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
         <CarCard v-for="car in cars" :key="car.id" :car="car" />
       </div>
 
@@ -372,11 +290,7 @@
       <!-- Paginacja -->
       <div v-if="totalPages > 1" class="p-4 border-t border-gray-200">
         <div class="flex justify-center">
-          <Pagination
-            :current-page="page"
-            :total-pages="totalPages"
-            @page-change="changePage"
-          />
+          <Pagination :current-page="page" :total-pages="totalPages" @page-change="changePage" />
         </div>
       </div>
     </div>
@@ -650,7 +564,6 @@ watch(
 
 // Obserwuj zmiany strony
 watch(page, () => {
-  console.log("watch v2");
   updateUrlFromFilters();
   fetchCars();
 });

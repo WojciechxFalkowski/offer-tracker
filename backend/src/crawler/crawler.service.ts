@@ -1033,37 +1033,47 @@ export class CrawlerService implements OnModuleInit {
 	public async updateMissingDates(): Promise<{ updated: number }> {
 		console.time('updateMissingDates');
 		const cars = await this.offerService.findCarsWithMissingDates();
+		const limitedCars = cars.slice(0, 100); // Limit to first 100 cars
 		let updatedCount = 0;
 		let offersCount = 0;
-		for (const car of cars) {
+		for (const car of limitedCars) {
 			offersCount++;
-			console.log(`Updating date for car ${offersCount} of ${cars.length}`);
+			console.log(`Updating data for car ${offersCount} of ${limitedCars.length}`);
 			try {
 				const { browser, page } = await createBrowserPage();
 				try {
-					console.time('updateMissingDate');
+					console.time('updateMissingData');
 					await page.goto(car.url, { waitUntil: 'networkidle', timeout: this.NAVIGATION_TIMEOUT });
 					await handleCookieBanner(page);
 
-					const { date: formattedDate } = await this.extractFormattedDate(page);
-					if (formattedDate) {
+					const { date: formattedDate, id: offerId } = await this.extractFormattedDate(page);
+					
+					if (formattedDate && !car.publishedDate) {
 						await this.offerService.updateCarDate(car.id, formattedDate);
 						updatedCount++;
 					}
-					console.timeEnd('updateMissingDate');
+
+					if (offerId && !car.externalId) {
+						car.externalId = offerId;
+						car.shortenedUrl = car.url.split('/').pop() || '';
+						await this.offerService.save(car);
+						updatedCount++;
+					}
+
+					console.timeEnd('updateMissingData');
 				} finally {
 					await browser.close();
-					console.log(`Updated date for car ${offersCount} of ${cars.length}`);
+					console.log(`Updated data for car ${offersCount} of ${limitedCars.length}`);
 				}
 			} catch (error) {
-				this.logger.error(`Error updating date for car ${car.id}:`, error);
+				this.logger.error(`Error updating data for car ${car.id}:`, error);
 			}
 		}
 		console.timeEnd('updateMissingDates');
 		return { updated: updatedCount };
 	}
 
-	public async checkCarOffer(url: string): Promise<{ price: number } | null> {
+	public async checkCarOffer(url: string): Promise<{ price: number, exists: boolean } | null> {
 		const { browser, page } = await createBrowserPage();
 		this.logger.log(`Checking car offer: ${url}`);
 
@@ -1078,10 +1088,10 @@ export class CrawlerService implements OnModuleInit {
 			await handleCookieBanner(page);
 
 			// Sprawdź czy strona zawiera komunikat o nieistnieniu oferty
-			const notFoundElement = await page.$('text="Przepraszamy, ale ogłoszenie, którego szukasz, nie istnieje."');
+			const notFoundElement = await page.$('text="Przykro nam, nie możemy znaleźć tej strony."');
 			if (notFoundElement) {
 				this.logger.log(`Offer no longer exists: ${url}`);
-				return null;
+				return { price: 0, exists: false };
 			}
 
 			// Pobierz cenę
@@ -1091,7 +1101,7 @@ export class CrawlerService implements OnModuleInit {
 				return null;
 			}
 
-			return { price };
+			return { price, exists: true };
 		} catch (error) {
 			this.logger.error(`Error checking car offer ${url}:`, error);
 			return null;

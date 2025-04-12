@@ -3,6 +3,7 @@
 export interface ResponseCar {
     id: number;
     externalId: string;
+    shortenedUrl?: string;
     title: string;
     price?: number;
     url: string;

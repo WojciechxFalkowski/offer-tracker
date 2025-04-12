@@ -21,6 +21,9 @@ export class Car {
     @Column({ unique: true })
     externalId: string;
 
+    @Column({ nullable: true })
+    shortenedUrl: string;
+
     @Column()
     title: string;
 

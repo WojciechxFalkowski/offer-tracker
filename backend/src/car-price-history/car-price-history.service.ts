@@ -65,13 +65,18 @@ export class CarPriceHistoryService {
 
             for (const car of cars) {
                 try {
-                    const newLastCheckedId = car.id;
-                    await this.settingsService.setSetting(SettingsKey.LAST_CHECKED_CAR_ID, { value: newLastCheckedId });
+                    console.time(`Processing car ${car.id}`);
                     this.logger.log(`Checking car ${car.id}`);
                     // Check if car still exists and get current price
                     const currentData = await this.crawlerService.checkCarOffer(car.url);
 
                     if (!currentData) {
+                        // Some error occurred, but we don't know if the offer exists or not
+                        this.logger.error(`Error checking car ${car.id} - skipping`);
+                        continue;
+                    }
+
+                    if (!currentData.exists) {
                         // Car offer no longer exists
                         car.isActive = false;
                         await this.carService.save(car);
@@ -91,6 +96,10 @@ export class CarPriceHistoryService {
                     processedCount++;
                 } catch (error) {
                     this.logger.error(`Error processing car ${car.id}: ${error.message}`);
+                } finally {
+                    const newLastCheckedId = car.id;
+                    await this.settingsService.setSetting(SettingsKey.LAST_CHECKED_CAR_ID, { value: newLastCheckedId });
+                    console.timeEnd(`Processing car ${car.id}`);
                 }
             }
 
