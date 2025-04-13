@@ -1043,11 +1043,18 @@ export class CrawlerService implements OnModuleInit {
 				const { browser, page } = await createBrowserPage();
 				try {
 					console.time('updateMissingData');
+					this.logger.log(`Updating data of ${car.url}`);
 					await page.goto(car.url, { waitUntil: 'networkidle', timeout: this.NAVIGATION_TIMEOUT });
 					await handleCookieBanner(page);
 
+					const notFound = await this.notFoundOffer(page);
+					if (notFound) {
+						this.logger.log(`Offer no longer exists: ${car.url}`);
+						continue;
+					}
+
 					const { date: formattedDate, id: offerId } = await this.extractFormattedDate(page);
-					
+
 					if (formattedDate && !car.publishedDate) {
 						await this.offerService.updateCarDate(car.id, formattedDate);
 						updatedCount++;
@@ -1088,8 +1095,8 @@ export class CrawlerService implements OnModuleInit {
 			await handleCookieBanner(page);
 
 			// Sprawdź czy strona zawiera komunikat o nieistnieniu oferty
-			const notFoundElement = await page.$('text="Przykro nam, nie możemy znaleźć tej strony."');
-			if (notFoundElement) {
+			const notFound = await this.notFoundOffer(page);
+			if (notFound) {
 				this.logger.log(`Offer no longer exists: ${url}`);
 				return { price: 0, exists: false };
 			}
@@ -1110,4 +1117,10 @@ export class CrawlerService implements OnModuleInit {
 		}
 	}
 
+	public async notFoundOffer(page: Page): Promise<boolean> {
+		console.time('notFoundOffer');
+		const notFoundElement = await page.$('text="Przykro nam, nie możemy znaleźć tej strony."');
+		console.timeEnd('notFoundOffer');
+		return notFoundElement ? true : false;
+	}
 }
