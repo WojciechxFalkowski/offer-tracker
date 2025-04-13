@@ -1,9 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { CAR_PRICE_HISTORY_REPOSITORY } from './car-price-history.contracts';
 import { CarPriceHistory } from './car-price-history.entity';
-import { Car } from '@/car/car.entity';
-import { MoreThan, Repository } from 'typeorm';
-import { CAR_REPOSITORY } from '@/car/car.contracts';
+import { Repository } from 'typeorm';
 import { CrawlerService } from '@/crawler/crawler.service';
 import { SettingsService } from '@/settings/settings.service';
 import { Cron } from '@nestjs/schedule';

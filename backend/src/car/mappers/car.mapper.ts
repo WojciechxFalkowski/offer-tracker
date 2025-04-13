@@ -35,5 +35,9 @@ export const mapCarToResponse = (car: Car): ResponseCar => {
             mileage: car.specification.mileage,
         },
         images: car.images.map((image) => image.imageUrl), // Płaska lista URL-i
+        priceHistory: car.priceHistory?.map(history => ({
+            price: history.price,
+            createdAt: history.createdAt
+        })) || []
     };
 };

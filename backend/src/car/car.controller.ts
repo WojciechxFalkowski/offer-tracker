@@ -50,6 +50,11 @@ export class CarController {
         return await this.offerService.getFilterOptions();
     }
 
+    @Get(':id')
+    async getCarById(@Param('id') id: string): Promise<ResponseCar> {
+        return await this.offerService.getCarById(id);
+    }
+
     @Delete(':id')
     async remove(@Param('id') id: string): Promise<void> {
         await this.offerService.remove(+id);

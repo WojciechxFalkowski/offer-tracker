@@ -9,7 +9,7 @@ import { carPriceHistoryProviders } from './car-price-history.providers';
 import { CrawlerModule } from '@/crawler/crawler.module';
 
 @Module({
-  imports: [DatabaseModule, ConfigModule, CarModule, SettingsModule, forwardRef(() => CrawlerModule)],
+  imports: [DatabaseModule, ConfigModule, SettingsModule, forwardRef(() => CrawlerModule), forwardRef(() => CarModule)],
   controllers: [CarPriceHistoryController],
   providers: [...carPriceHistoryProviders, CarPriceHistoryService],
   exports: [CarPriceHistoryService]

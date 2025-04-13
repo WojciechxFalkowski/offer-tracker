@@ -12,6 +12,10 @@ export interface Offer {
     createdAt: string;
     updatedAt: Date;
     trackedUrlId: number | null; // Dodane pole
+    priceHistory: {
+        price: number;
+        createdAt: string;
+    }[];
 }
 
 export interface CarDetails {

@@ -19,6 +19,28 @@ export class CarService {
         private offerRepository: Repository<Car>,
     ) { }
 
+    private createBaseQueryBuilder() {
+        return this.offerRepository.createQueryBuilder('car')
+            .leftJoinAndSelect('car.details', 'details')
+            .leftJoinAndSelect('car.specification', 'specification')
+            .leftJoinAndSelect('car.images', 'images')
+            .leftJoinAndSelect('car.priceHistory', 'priceHistory')
+            .orderBy('priceHistory.createdAt', 'DESC');
+    }
+
+    public async getCarById(id: string): Promise<ResponseCar> {
+        const queryBuilder = this.createBaseQueryBuilder();
+        const car = await queryBuilder
+            .where('car.id = :id', { id })
+            .getOne();
+
+        if (!car) {
+            throw new NotFoundException(`Car with ID ${id} not found`);
+        }
+
+        return mapCarToResponse(car);
+    }
+
     public async getBrands(): Promise<string[]> {
         const result = await this.offerRepository
             .createQueryBuilder('car')
@@ -226,15 +248,14 @@ export class CarService {
         filters: Record<string, any> = {},
     ): Promise<{ cars: ResponseCar[]; total: number }> {
         const skip = (page - 1) * pageSize;
-        const queryBuilder = this.offerRepository.createQueryBuilder('car')
-            .leftJoinAndSelect('car.details', 'details')
-            .leftJoinAndSelect('car.specification', 'specification')
-            .leftJoinAndSelect('car.images', 'images');
+        const queryBuilder = this.createBaseQueryBuilder();
+
         // Przygotowanie filtrów (opcjonalnie)
         const where = this.prepareFilters(filters);
         if (Object.keys(where).length > 0) {
             queryBuilder.where(where);
         }
+
         // Mapowanie sortowania do odpowiednich tabel
         let sortColumn: string;
         if (['brand', 'model', 'productionYear'].includes(sort)) {
@@ -245,6 +266,7 @@ export class CarService {
             sortColumn = `car.${sort}`;
         }
         queryBuilder.orderBy(sortColumn, order.toUpperCase() as 'ASC' | 'DESC');
+
         const [cars, total] = await queryBuilder.skip(skip).take(pageSize).getManyAndCount();
         return {
             cars: cars.map(mapCarToResponse),

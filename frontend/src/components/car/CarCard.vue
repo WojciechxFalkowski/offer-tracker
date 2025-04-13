@@ -1,24 +1,24 @@
 <template>
   <div
-    class="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
-  >
+    class="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
     <CarImageCarousel :images="car.images || []" :alt="car.title">
       <template #overlay> </template>
+      <template #badge>
+        <Badge v-if="car.priceHistory?.length > 0"
+          v-tooltip="{ value: car.priceHistory.map(history => `${formatTimeToDate(history.createdAt)}: ${history.price} zł`).join('\n'), class: 'min-w-[300px] text-center' }"
+          :value="car.priceHistory.length" severity="info" class="bg-blue-500 text-white">
+        </Badge>
+      </template>
     </CarImageCarousel>
 
     <!-- Główne informacje -->
     <div class="flex flex-col h-full p-4 gap-4">
       <div class="flex justify-between items-start">
-        <h2
-          class="font-bold text-gray-800 mb-1 truncate overflow-hidden text-ellipsis"
-          :title="car.title"
-        >
+        <h2 class="font-bold text-gray-800 mb-1 truncate overflow-hidden text-ellipsis" :title="car.title">
           {{ car.title }}
         </h2>
 
-        <span class="font-bold text-blue-600 text-nowrap"
-          >{{ car.price }} zł</span
-        >
+        <span class="font-bold text-blue-600 text-nowrap">{{ car.price }} zł</span>
       </div>
 
       <!-- Podstawowe dane -->
@@ -27,10 +27,7 @@
         <CarInfoField label="Model" :value="car.details.model" />
         <CarInfoField label="Rok" :value="car.details.productionYear" />
         <CarInfoField label="Przebieg" :value="car.specification.mileage" />
-        <CarInfoField
-          label="Silnik"
-          :value="car.specification.engineCapacity"
-        />
+        <CarInfoField label="Silnik" :value="car.specification.engineCapacity" />
         <CarInfoField label="Moc" :value="car.specification.power" />
         <CarInfoField label="Paliwo" :value="car.specification.fuelType" />
         <CarInfoField label="Skrzynia" :value="car.specification.gearbox" />
@@ -63,11 +60,7 @@
           </span>
         </div>
 
-        <a
-          :href="car.url"
-          target="_blank"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm"
-        >
+        <a :href="car.url" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">
           Zobacz ofertę
         </a>
       </div>
@@ -114,6 +107,7 @@ import CarImageCarousel from "./CarImageCarousel.vue";
 import CarInfoField from "@/components/car/CarInfoField.vue";
 import CarInfoSection from "@/components/car/CarInfoSection.vue";
 import { formatTimeToDate } from "@/utils/dates";
+import Badge from 'primevue/badge';
 
 const props = defineProps({
   car: {

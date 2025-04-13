@@ -33,4 +33,8 @@ export interface ResponseCar {
         mileage?: string;
     };
     images: string[];
+    priceHistory: {
+        price: number;
+        createdAt: Date;
+    }[];
 }
